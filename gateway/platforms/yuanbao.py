@@ -4558,10 +4558,17 @@ class YuanbaoAdapter(BasePlatformAdapter):
         chat_id conventions:
           "group:<group_code>"  → group chat
           "direct:<account>"   → C2C / direct message (default)
-
-        TODO (T06): fetch real chat name/member-count from Yuanbao API.
         """
         if chat_id.startswith("group:"):
+            group_code = chat_id[len("group:"):]
+            info = await self.query_group_info(group_code)
+            if info:
+                return {
+                    "name": info.get("group_name") or chat_id,
+                    "type": "group",
+                    "member_count": info.get("member_count", 0),
+                    "owner_id": info.get("owner", "")
+                }
             return {"name": chat_id, "type": "group"}
         return {"name": chat_id, "type": "dm"}
 

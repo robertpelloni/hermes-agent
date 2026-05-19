@@ -14,7 +14,16 @@ Provides subcommands for:
 import os
 import sys
 
-__version__ = "0.13.0"
+import importlib.metadata
+try:
+    __version__ = importlib.metadata.version("hermes-agent")
+except importlib.metadata.PackageNotFoundError:
+    import pathlib
+    version_file = pathlib.Path(__file__).parent.parent / "VERSION.md"
+    try:
+        __version__ = version_file.read_text().strip()
+    except Exception:
+        __version__ = "unknown"
 __release_date__ = "2026.5.7"
 
 

@@ -408,6 +408,9 @@ class TestExpiredCodexFallback:
         monkeypatch.setenv("OPENROUTER_API_KEY", "or-test-key")
 
         with patch("agent.auxiliary_client.OpenAI") as mock_openai:
+            from agent.auxiliary_client import _aux_unhealthy_until, _aux_unhealthy_logged_at
+            _aux_unhealthy_until.clear()
+            _aux_unhealthy_logged_at.clear()
             mock_openai.return_value = MagicMock()
             from agent.auxiliary_client import _resolve_auto
             client, model = _resolve_auto()
@@ -937,6 +940,9 @@ class TestTryPaymentFallback:
 
     def test_skips_failed_provider(self):
         mock_client = MagicMock()
+        from agent.auxiliary_client import _aux_unhealthy_until, _aux_unhealthy_logged_at
+        _aux_unhealthy_until.clear()
+        _aux_unhealthy_logged_at.clear()
         with patch("agent.auxiliary_client._try_openrouter", return_value=(None, None)), \
              patch("agent.auxiliary_client._try_nous", return_value=(mock_client, "nous-model")), \
              patch("agent.auxiliary_client._read_main_provider", return_value="openrouter"):
@@ -958,6 +964,9 @@ class TestTryPaymentFallback:
     def test_codex_alias_maps_to_chain_label(self):
         """'codex' should map to 'openai-codex' in the skip set."""
         mock_client = MagicMock()
+        from agent.auxiliary_client import _aux_unhealthy_until, _aux_unhealthy_logged_at
+        _aux_unhealthy_until.clear()
+        _aux_unhealthy_logged_at.clear()
         with patch("agent.auxiliary_client._try_openrouter", return_value=(mock_client, "or-model")), \
              patch("agent.auxiliary_client._read_main_provider", return_value="openai-codex"):
             client, model, label = _try_payment_fallback("openai-codex", task="vision")
