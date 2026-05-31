@@ -1,0 +1,5 @@
+3a9bc9d88 fix(model picker): unify /model and `hermes model` lists, add disk cache (#33867)
+5f66c3647 fix(redact): pass web URLs through unchanged (#34029)
+7a8589e78 fix(gateway): default media-delivery validation to denylist-only, restore .md delivery (#34022)
+7050c052e fix(skills): pull full skills.sh catalog via sitemap (858 → 19,932) (#34025)
+b1d3ead7f docs: tweak v0.15.0 release notes (#34037)
