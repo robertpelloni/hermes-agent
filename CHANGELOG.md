@@ -1,5 +1,19 @@
 # changelog
 
+## 1.0.0-build.2 (2026-06-14)
+
+### added
+- tool parity catalog (`pkg/compat`) - exact-name contracts from Claude Code, Codex, Warp, Aider, pi, and 10+ other harnesses
+- provider routing (`pkg/adapters`) - cost/preference-aware provider selection with MCP and HyperCode adapters
+- repo map generation (`pkg/repomap`) - aider-style context condensation with ranked file relevance
+- foundation mode (`--foundation`) - integrated features from pi-mono and hyperharness
+- mode switching in START.BAT for foundation mode
+
+### changed
+- main.go imports and initializes all integration packages
+- START.BAT updated with foundation command and comprehensive help
+- hermes-desktop.exe rebuilt with new packages (6.0 MB)
+
 ## 1.0.0-build.1 (2026-06-13)
 
 ### added

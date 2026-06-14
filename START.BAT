@@ -2,12 +2,12 @@
 setlocal enabledelayedexpansion
 title Hermes Agent Go
 
-:: ═══════════════════════════════════════════════════════════════
+:: =============================================================================
 :: Hermes Agent Go - The Self-Improving AI Agent
 :: Module:  github.com/robertpelloni/hermes-agent
 :: Entry:    cmd/hermes/main.go
 :: binary: hermes-desktop.exe
-:: ═══════════════════════════════════════════════════════════════
+:: =============================================================================
 
 cd /d "%~dp0"
 
@@ -17,13 +17,15 @@ set "ENTRY=./cmd/hermes"
 :: ─── Parse command ──────────────────────────────────────────
 set "CMD=%1"
 if "%CMD%"=="" set "CMD=run"
-if /i "%CMD%"=="run"      goto :run
-if /i "%CMD%"=="build"    goto :build
-if /i "%CMD%"=="tui"      goto :tui
-if /i "%CMD%"=="gateway"  goto :gateway
-if /i "%CMD%"=="test"     goto :test
-if /i "%CMD%"=="clean"    goto :clean
-if /i "%CMD%"=="help"     goto :help
+if /i "%CMD%"=="run"       goto :run
+if /i "%CMD%"=="build"     goto :build
+if /i "%CMD%"=="tui"       goto :tui
+if /i "%CMD%"=="gateway"   goto :gateway
+if /i "%CMD%"=="cli"       goto :cli
+if /i "%CMD%"=="foundation" goto :foundation
+if /i "%CMD%"=="test"      goto :test
+if /i "%CMD%"=="clean"     goto :clean
+if /i "%CMD%"=="help"      goto :help
 echo Unknown command: %CMD%
 goto :help
 
@@ -66,6 +68,24 @@ echo  [Hermes Agent Go] Gateway only (Telegram/Discord/CLI)
 %BINARY% --gateway
 goto :end
 
+:: ─── CLI Mode ───────────────────────────────────────────────
+:cli
+if not exist %BINARY% call :build
+if errorlevel 1 exit /b 1
+echo  [Hermes Agent Go] Running Python CLI
+%BINARY% --cli
+goto :end
+
+:: ─── Foundation Mode ────────────────────────────────────────
+:foundation
+if not exist %BINARY% call :build
+if errorlevel 1 exit /b 1
+echo  [Hermes Agent Go] Foundation Mode - Integrated Features
+echo.
+echo  Tool Parity Catalog, Provider Routing, Repo Map
+%BINARY% --foundation
+goto :end
+
 :: ─── Test ───────────────────────────────────────────────────
 :test
 echo  [Hermes Agent Go] Running tests...
@@ -85,28 +105,32 @@ echo.
 echo  Hermes Agent Go - Usage: start.bat [command]
 echo.
 echo  Commands:
-echo    run       Build and run agent (default)
-echo    build     Build binary only
-echo    tui       Interactive TUI mode
-echo    tui is now the same as run - desktop launches both dashboard and tui
-echo    gateway   Start gateway listeners only
-echo    test      Run tests
-echo    clean     Remove binary
-echo    help      Show this help
+echo    run         Build and run agent (default)
+echo    build       Build binary only
+echo    tui         Interactive TUI mode
+echo    gateway     Start gateway listeners only
+echo    cli         Run Python hermes CLI
+echo    foundation  Show foundation integration features
+echo    test        Run tests
+echo    clean       Remove binary
+echo    help        Show this help
 echo.
 echo  Packages:
-echo    pkg/agent      Agent core logic
-echo    pkg/gateway    Telegram/Discord/CLI gateways
-echo    pkg/mcp        Model Context Protocol
-echo    pkg/memory     Persistent memory
-echo    pkg/scheduler  Task scheduling
-echo    pkg/skill      Skill system
+echo    pkg/agent       Agent core logic
+echo    pkg/adapters    MCP, provider routing adapters
+echo    pkg/compat      Tool parity catalog (15+ harnesses)
+echo    pkg/gateway     Telegram/Discord/CLI gateways
+echo    pkg/mcp         Model Context Protocol
+echo    pkg/memory      Persistent memory
+echo    pkg/repomap     Aider-style repo map generation
+echo    pkg/scheduler   Task scheduling
+echo    pkg/skill       Skill system
 echo.
 echo  Environment:
-echo    HERMES_MODEL      Default model name
-echo    HERMES_PROVIDER   Default provider (openrouter)
-echo    OPENAI_API_KEY    OpenAI API key
-echo    ANTHROPIC_API_KEY Anthropic API key
+echo    HERMES_MODEL       Default model name
+echo    HERMES_PROVIDER    Default provider (openrouter)
+echo    OPENAI_API_KEY     OpenAI API key
+echo    ANTHROPIC_API_KEY  Anthropic API key
 echo.
 goto :end
 
