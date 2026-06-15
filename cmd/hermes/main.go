@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -15,13 +16,15 @@ import (
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
 	"github.com/robertpelloni/hermes-agent/pkg/adapters"
+	"github.com/robertpelloni/hermes-agent/pkg/assimilation"
 	"github.com/robertpelloni/hermes-agent/pkg/compat"
 	"github.com/robertpelloni/hermes-agent/pkg/gateway"
 	"github.com/robertpelloni/hermes-agent/pkg/mcp"
 	"github.com/robertpelloni/hermes-agent/pkg/memory"
+	"github.com/robertpelloni/hermes-agent/pkg/modelregistry"
+	"github.com/robertpelloni/hermes-agent/pkg/orchestration"
+	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
-	"github.com/robertpelloni/hermes-agent/pkg/scheduler"
-	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
 func findPython() (string, error) {
@@ -72,19 +75,31 @@ func main() {
 	// ----- mode handling ---------------------------------------------------
 	// default mode launches the full dashboard (web UI with embedded TUI).
 	// optional flags allow launching only specific harnesses.
-	mode := "dashboard"
+	mode := "agent"
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
-		case "--tui":
-			mode = "tui"
+		case "--dashboard", "--tui":
+			mode = "dashboard"
 		case "--gateway":
 			mode = "gateway"
 		case "--cli":
 			mode = "cli"
 		case "--foundation":
 			mode = "foundation"
+		case "--help", "-h":
+			fmt.Println("Usage: hermes-desktop [mode]")
+			fmt.Println()
+			fmt.Println("Modes (default: agent):")
+			fmt.Println("  (no flags)     Agent mode – run the Go agent interactively")
+			fmt.Println("  --dashboard    Start the Python web dashboard with embedded TUI")
+			fmt.Println("  --tui          Start the Python TUI (same as --dashboard)")
+			fmt.Println("  --gateway      Gateway-only mode (no dashboard)")
+			fmt.Println("  --cli          Launch the Python CLI")
+			fmt.Println("  --foundation   Show integrated feature inventory")
+			fmt.Println("  --help         Show this help")
+			return
 		default:
-			mode = "dashboard"
+			mode = "agent"
 		}
 	}
 
@@ -181,6 +196,36 @@ func main() {
 		}
 		defer cliCmd.Process.Kill()
 
+	case "agent":
+		// Agent mode – run the Go agent interactively via stdin/stdout.
+		fmt.Println("running Go agent interactively. type '/quit' or '/exit' to stop.")
+		ag := agent.New(agent.DefaultConfig())
+		if err := ag.Run(ctx); err != nil {
+			log.Printf("agent run error: %v", err)
+		}
+		scanner := bufio.NewScanner(os.Stdin)
+		for {
+			fmt.Print("\n> ")
+			if !scanner.Scan() {
+				break
+			}
+			line := strings.TrimSpace(scanner.Text())
+			if line == "" {
+				continue
+			}
+			if line == "/quit" || line == "/exit" {
+				fmt.Println("exiting agent")
+				break
+			}
+			resp, err := ag.HandleMessage(ctx, "cli", "local", line)
+			if err != nil {
+				fmt.Printf("Error: %v\n", err)
+			} else {
+				fmt.Println(resp)
+			}
+		}
+		return
+
 	case "foundation":
 		// Foundation mode – exposes integrated features from pi-mono and hyperharness.
 		fmt.Println("foundation mode – integrated features from pi-mono and hyperharness")
@@ -208,22 +253,52 @@ func main() {
 			}
 		}
 		
+		// Show model registry status
+		fmt.Println("\nModel Registry:")
+		mr := modelregistry.NewModelRegistry()
+		fmt.Println(mr.FormatProviderStatus())
+		
+		// Show assimilation inventory
+		fmt.Println("\nAssimilation Inventory:")
+		fmt.Println(assimilation.FormatInventory())
+		
+		// Demo plan generation
+		fmt.Println("\nSample Execution Plan:")
+		planReq := orchestration.PlanRequest{
+			Prompt:       "List all Go files in this repository and summarize their purpose.",
+			IncludeRepo:  true,
+			MaxRepoFiles: 8,
+		}
+		plan, err := orchestration.BuildPlan(planReq)
+		if err != nil {
+			fmt.Printf("  (error generating plan: %v)\n", err)
+		} else {
+			fmt.Println(plan.FormatPlan())
+		}
+		
 	}
 
 	// ----- common subsystem initialization -----------------------------------
 	memStore := memory.NewStore()
-	skillRepo := skill.NewRepository()
 	mcpServer := mcp.NewServer("hermes-agent-go", "0.1.0")
-	sched := scheduler.New()
+	pluginMgr := plugin.NewManager()
+	if discovered, err := pluginMgr.Discover(); err == nil && len(discovered) > 0 {
+		fmt.Printf("  plugins discovered: %v\n", discovered)
+	}
 
-	ag := agent.New(agent.Config{
-		Model:     os.Getenv("HERMES_MODEL"),
-		Provider:  os.Getenv("HERMES_PROVIDER"),
-		Memory:    memStore,
-		Skills:    skillRepo,
-		MCPServer: mcpServer,
-		Scheduler: sched,
-	})
+	ag := agent.New(agent.DefaultConfig())
+
+	// Start MCP server in background
+	go func() {
+		mcpAddr := os.Getenv("HERMES_MCP_PORT")
+		if mcpAddr == "" {
+			mcpAddr = ":9090"
+		}
+		fmt.Printf("  MCP server starting on %s...\n", mcpAddr)
+		if err := mcpServer.Start(mcpAddr); err != nil {
+			log.Printf("MCP server error: %v", err)
+		}
+	}()
 
 	gw := gateway.New(ag)
 	if err := gw.Start(ctx); err != nil {
@@ -240,6 +315,7 @@ func main() {
 	fmt.Println()
 	fmt.Println("shutting down...")
 	cancel()
+	memStore.Close()
 	gw.Stop()
 	fmt.Println("done.")
 }
