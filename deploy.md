@@ -55,3 +55,6 @@ git merge upstream/main
 # resolve conflicts if any
 git push origin main
 ```
+## massive multi-language port deploy
+- Deployment will eventually encompass 5 native builds (TypeScript, Rust, Go, C#, Java).
+- Each version will follow its own standard build toolchain (cargo, go, javac/maven, dotnet, tsc/bun).

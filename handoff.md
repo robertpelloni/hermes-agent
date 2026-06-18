@@ -45,3 +45,16 @@ go desktop app built and tested as a python hermes dashboard launcher. merged 34
 - start.bat — updated binary name to hermes-desktop.exe
 - version.md, changelog.md, roadmap.md, todo.md, vision.md, memory.md, deploy.md, ideas.md — new
 - handoff.md — this file
+## handoff — massive multi-language port kick-off
+
+### session summary
+- We are pivoting to build the ULTIMATE AGENTIC CODING HARNESS.
+- Goal: Feature parity with 30+ leading AI CLI tools.
+- Goal: Maintain 5 identical parallel implementations in Rust, Go, Java, C#, and TypeScript.
+- Initialized core documentation updates and created base project structures for the port.
+- Added first reference submodule (`code` cli) to begin analysis.
+
+### next steps
+- Begin deep analysis of the `code` cli submodule.
+- Extract architectural patterns and document them.
+- Start writing the identical port of `code` features in the 5 target languages.

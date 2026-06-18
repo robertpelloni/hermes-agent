@@ -41,3 +41,9 @@
 - [ ] pi-agent-core agent runtime (pi-mono packages/agent)
 - [ ] pi-tui differential rendering (pi-mono packages/tui)
 - [ ] pi-web-ui web components (pi-mono packages/web-ui)
+## massive multi-language port tasks
+- [ ] Create base directories for `rust/`, `go/`, `csharp/`, `java/`, and `typescript/`.
+- [ ] Add `https://github.com/just-every/code.git` as a submodule for feature analysis.
+- [ ] Document Code CLI features and architecture.
+- [ ] Re-implement Code CLI features in Rust, Go, C#, Java, TypeScript.
+- [ ] Remove Code CLI submodule.
