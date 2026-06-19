@@ -34,3 +34,10 @@
 - [ ] macOS app bundle
 - [ ] linux appimage
 - [ ] auto-update mechanism
+## phase 6: ultimate multi-language harness (new)
+- [ ] Initialize repository structure for 5 versions: TypeScript, Rust, Go, C#, Java.
+- [ ] Add reference harnesses as submodules to analyze features.
+- [ ] Analyze Code CLI, Reimplement features in 5 languages, Remove submodule.
+- [ ] Analyze Codebuff CLI, Reimplement features in 5 languages, Remove submodule.
+- [ ] Continue this process for all ~30 other harnesses.
+- [ ] Ensure full feature parity with WebUI and TUI/CLI across all 5 language versions.

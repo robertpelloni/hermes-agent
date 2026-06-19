@@ -33,3 +33,5 @@ hermes-desktop.exe (go)
 - [ ] go agent loop implemented (future)
 - [ ] go skill system implemented (future)
 - [ ] go memory persistence implemented (future)
+## The Ultimate Agentic Coding Harness
+We are turning this into the ULTIMATE AGENTIC CODING HARNESS. We will rebuild/port the entire system identically in 5 languages: TypeScript, Rust, Go, C#, and Java. It will include all features and functionalities from over 30 leading CLI tools, and we will feature parity with Amp, Auggie, Claude Code, Codebuff, Codemachine, Codex, Copilot CLI, Crush, Factory Droid, Gemini CLI, Goose CLI, Grok Build, Kilo Code CLI, Kimi CLI, Mistral Vibe CLI, Opencode, Qwen Code CLI, Warp CLI, Trae CLI. We will be the best CLI/TUI/WebUI tool.

@@ -1,0 +1,3 @@
+[submodule "code_submodule"]
+	path = code_submodule
+	url = https://github.com/just-every/code.git
