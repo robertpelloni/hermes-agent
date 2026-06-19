@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -23,15 +22,21 @@ var CommandRegistry = []CommandDef{
 		Category:    "Info",
 		Aliases:     []string{"?", "h"},
 		Handler: func(args string) string {
-			var sb strings.Builder
-			sb.WriteString("## Hermes TUI - Available Commands\n\n")
-			sb.WriteString("| Command | Description |\n")
-			sb.WriteString("|---------|-------------|\n")
-			for _, cmd := range CommandRegistry {
-				sb.WriteString(fmt.Sprintf("| `/%s` | %s |\n", cmd.Name, cmd.Description))
-			}
-			sb.WriteString("\n**Usage:** Type `/` followed by a command name, or press `/` to open the command palette.\n")
-			return sb.String()
+			return `## Hermes TUI - Available Commands
+
+| Command | Description |
+|---------|-------------|
+| /help | Show available commands and usage |
+| /clear | Clear the transcript and start fresh |
+| /new | Start a new conversation session |
+| /quit | Exit the TUI |
+| /status | Show current session status |
+| /tools | List available tools |
+| /skills | List loaded skills |
+| /skin <name> | Change UI skin (e.g. /skin mono) |
+
+**Usage:** Type '/' followed by a command name, or press '/' to open the command palette.
+`
 		},
 	},
 	{
@@ -85,6 +90,16 @@ var CommandRegistry = []CommandDef{
 			return "**Loaded Skills:**\n\n_No skills currently loaded._\n\nUse `hermes skills list` in the CLI to see available skills."
 		},
 	},
+	{
+Name:        "skin",
+Description: "Change UI skin (e.g. /skin mono).",
+Category:    "Configuration",
+ArgsHint:    "<name>",
+Handler: func(args string) string {
+// Handled specially in UI; return empty string.
+return ""
+},
+	},
 }
 
 // FindCommand looks up a command by name or alias.
@@ -119,3 +134,5 @@ func FilterCommands(query string) []CommandDef {
 	}
 	return results
 }
+
+// helpHandler generates the help text dynamically to avoid initialization cycles.
