@@ -22,17 +22,7 @@ var CommandRegistry = []CommandDef{
 		Description: "Show available commands and usage",
 		Category:    "Info",
 		Aliases:     []string{"?", "h"},
-		Handler: func(args string) string {
-			var sb strings.Builder
-			sb.WriteString("## Hermes TUI - Available Commands\n\n")
-			sb.WriteString("| Command | Description |\n")
-			sb.WriteString("|---------|-------------|\n")
-			for _, cmd := range CommandRegistry {
-				sb.WriteString(fmt.Sprintf("| `/%s` | %s |\n", cmd.Name, cmd.Description))
-			}
-			sb.WriteString("\n**Usage:** Type `/` followed by a command name, or press `/` to open the command palette.\n")
-			return sb.String()
-		},
+		Handler: nil, // Initialized in init()
 	},
 	{
 		Name:        "clear",
@@ -118,4 +108,17 @@ func FilterCommands(query string) []CommandDef {
 		}
 	}
 	return results
+}
+func init() {
+	CommandRegistry[0].Handler = func(args string) string {
+		var sb strings.Builder
+		sb.WriteString("## Hermes TUI - Available Commands\n\n")
+		sb.WriteString("| Command | Description |\n")
+		sb.WriteString("|---------|-------------|\n")
+		for _, cmd := range CommandRegistry {
+			sb.WriteString(fmt.Sprintf("| `/%s` | %s |\n", cmd.Name, cmd.Description))
+		}
+		sb.WriteString("\n**Usage:** Type `/` followed by a command name, or press `/` to open the command palette.\n")
+		return sb.String()
+	}
 }

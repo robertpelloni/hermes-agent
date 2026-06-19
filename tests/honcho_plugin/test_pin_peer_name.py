@@ -747,7 +747,11 @@ class TestPinTransition:
         cfg_path.write_text(json.dumps({"apiKey": "k", "peerName": "Igor", "pinPeerName": True}))
         sig_pinned = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
+        import os
+        import time as _t
         cfg_path.write_text(json.dumps({"apiKey": "k", "peerName": "Igor", "pinPeerName": False}))
+        new_time = _t.time() + 10.0
+        os.utime(cfg_path, (new_time, new_time))
         sig_unpinned = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
         assert sig_pinned["honcho.pin_peer_name"] != sig_unpinned["honcho.pin_peer_name"]
@@ -761,11 +765,15 @@ class TestPinTransition:
         cfg_path.write_text(json.dumps({"apiKey": "k", "peerName": "Igor"}))
         sig_no_aliases = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
+        import os
+        import time as _t
         cfg_path.write_text(json.dumps({
             "apiKey": "k",
             "peerName": "Igor",
             "userPeerAliases": {"86701400": "Igor"},
         }))
+        new_time = _t.time() + 10.0
+        os.utime(cfg_path, (new_time, new_time))
         sig_with_aliases = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
         assert sig_no_aliases["honcho.user_peer_aliases"] != sig_with_aliases["honcho.user_peer_aliases"]
@@ -779,11 +787,15 @@ class TestPinTransition:
         cfg_path.write_text(json.dumps({"apiKey": "k", "peerName": "Igor"}))
         sig_no_prefix = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
+        import os
+        import time as _t
         cfg_path.write_text(json.dumps({
             "apiKey": "k",
             "peerName": "Igor",
             "runtimePeerPrefix": "telegram_",
         }))
+        new_time = _t.time() + 10.0
+        os.utime(cfg_path, (new_time, new_time))
         sig_with_prefix = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
         assert sig_no_prefix["honcho.runtime_peer_prefix"] != sig_with_prefix["honcho.runtime_peer_prefix"]
@@ -807,11 +819,15 @@ class TestPinTransition:
         }))
         sig_before = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
+        import os
+        import time as _t
         cfg_path.write_text(json.dumps({
             "apiKey": "k",
             "peerName": "Igor",
             "aiPeer": "hermetika",
         }))
+        new_time = _t.time() + 10.0
+        os.utime(cfg_path, (new_time, new_time))
         sig_after = GatewayRunner._extract_cache_busting_config({"memory": {"provider": "honcho"}})
 
         assert sig_before["honcho.ai_peer"] != sig_after["honcho.ai_peer"]

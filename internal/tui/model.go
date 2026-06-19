@@ -41,6 +41,9 @@ type Model struct {
 	showPalette    bool
 	paletteInput   textinput.Model
 	paletteList    list.Model
+
+	// The active UI skin
+	skin           *skinpkg.Skin
 }
 
 // streamMsg wraps an agent StreamEvent into a Bubble Tea message.
