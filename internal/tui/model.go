@@ -41,9 +41,7 @@ type Model struct {
 	showPalette    bool
 	paletteInput   textinput.Model
 	paletteList    list.Model
-
-	// The active UI skin
-	skin           *skinpkg.Skin
+	skin           *skinpkg.Skin // currently active skin
 }
 
 // streamMsg wraps an agent StreamEvent into a Bubble Tea message.
@@ -171,6 +169,13 @@ func (m *Model) addLine(line string) {
 	if err != nil {
 		rendered = line
 	}
+	// Apply response border color from skin if defined.
+	if m.skin != nil && m.skin.Colors.ResponseBorder != "" {
+		style := lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color(m.skin.Colors.ResponseBorder))
+		rendered = style.Render(rendered)
+	}
 	m.transcriptList.InsertItem(len(m.transcriptList.Items()), transcriptItem{content: rendered})
 }
 
@@ -183,7 +188,11 @@ func (m *Model) updateThinkingLine() string {
 	if m.activeToolName != "" {
 		label = fmt.Sprintf("*Running tool:* %s", m.activeToolName)
 	}
-	return fmt.Sprintf("%s  %s ", m.spin.View(), label)
+	prefix := ""
+	if m.skin != nil && m.skin.ToolPrefix != "" {
+		prefix = m.skin.ToolPrefix + " "
+	}
+	return fmt.Sprintf("%s%s  %s ", m.spin.View(), prefix, label)
 }
 
 // Update handles incoming Bubble Tea messages.
@@ -215,17 +224,55 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.showPalette = false
 						return m, nil
 					}
-					if cmdDef.Name == "new" {
-						// Reset everything – clear transcript and reset state.
-						m.transcriptList = list.NewModel([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-						m.addLine(output)
-						m.showPalette = false
-						return m, nil
-					}
-					// Default: treat output as a normal assistant message.
-					m.addLine(output)
+if cmdDef.Name == "new" {
+				// Reset everything – clear transcript and reset state.
+				m.transcriptList = list.NewModel([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+				m.addLine(output)
+				m.showPalette = false
+				return m, nil
+			}
+			if cmdDef.Name == "skin" {
+				// Extract argument after the command name.
+				args := strings.TrimSpace(strings.TrimPrefix(m.paletteInput.Value(), cmdDef.Name))
+				if args == "" {
+					m.addLine("**Error:** usage: /skin <name>")
 					m.showPalette = false
 					return m, nil
+				}
+				newSkin, err := skinpkg.Load(args)
+				if err != nil {
+					m.addLine(fmt.Sprintf("**Error:** unknown skin \"%s\"", args))
+					m.showPalette = false
+					return m, nil
+				}
+				// Persist choice to config.yaml.
+				if home := os.Getenv("HERMES_HOME"); home != "" {
+					cfgPath := filepath.Join(home, "config.yaml")
+					data, _ := os.ReadFile(cfgPath)
+					lines := strings.Split(string(data), "\n")
+					found := false
+					for i, l := range lines {
+						if strings.HasPrefix(strings.TrimSpace(l), "display.skin:") {
+							lines[i] = fmt.Sprintf("display.skin: %s", args)
+							found = true
+							break
+						}
+					}
+					if !found {
+						lines = append(lines, fmt.Sprintf("display.skin: %s", args))
+					}
+					_ = os.WriteFile(cfgPath, []byte(strings.Join(lines, "\n")), 0644)
+				}
+				// Apply the skin now.
+				m.applySkin(newSkin)
+				m.addLine(fmt.Sprintf("**Skin changed to** `%s`", args))
+				m.showPalette = false
+				return m, nil
+			}
+			// Default: treat output as a normal assistant message.
+			m.addLine(output)
+			m.showPalette = false
+			return m, nil
 				}
 				return m, nil
 			case "up", "down", "ctrl+k", "ctrl+j":

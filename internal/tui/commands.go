@@ -22,7 +22,7 @@ var CommandRegistry = []CommandDef{
 		Description: "Show available commands and usage",
 		Category:    "Info",
 		Aliases:     []string{"?", "h"},
-		Handler: nil, // Initialized in init()
+		Handler:     nil, // Initialized in init()
 	},
 	{
 		Name:        "clear",
@@ -75,6 +75,16 @@ var CommandRegistry = []CommandDef{
 			return "**Loaded Skills:**\n\n_No skills currently loaded._\n\nUse `hermes skills list` in the CLI to see available skills."
 		},
 	},
+	{
+		Name:        "skin",
+		Description: "Change UI skin (e.g. /skin mono).",
+		Category:    "Configuration",
+		ArgsHint:    "<name>",
+		Handler: func(args string) string {
+			// Handled specially in UI; return empty string.
+			return ""
+		},
+	},
 }
 
 // FindCommand looks up a command by name or alias.
@@ -109,6 +119,7 @@ func FilterCommands(query string) []CommandDef {
 	}
 	return results
 }
+
 func init() {
 	CommandRegistry[0].Handler = func(args string) string {
 		var sb strings.Builder
