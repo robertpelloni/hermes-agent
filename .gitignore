@@ -151,3 +151,10 @@ csharp/bin/
 csharp/obj/
 typescript/node_modules/
 java/**/*.class
+
+# Aider submodule
+aider_submodule/
+
+# Workspace go files
+go.work
+go.work.sum
