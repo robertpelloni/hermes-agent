@@ -21,8 +21,8 @@ For granular tasks and immediate bug fixes, see `TODO.md`.
 * [x] **Submodule Status Check**: Real-time submodule git status checks in the Go backend are not fully wired to the `/system/status` UI.
 
 ## Phase 2: Agent Autonomy & Memory (Active)
-- [ ] Implement Agent Loop in Go (Interactive REPL loop).
-- [ ] Implement persistent Memory Storage structures in Go.
+- [x] Implement Agent Loop in Go (Interactive REPL loop).
+- [x] Implement persistent Memory Storage structures in Go.
 - [ ] Implement robust auto-committing of LLM changes.
 - [ ] Implement Change Buffering Engine (In-Memory VFS).
 

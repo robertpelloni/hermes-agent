@@ -17,8 +17,8 @@
 - Implemented the `rust` Change Buffering Engine (In-Memory VFS) under `rust/src/vfs.rs` to support the CodeBuff integration feature.
 - Implemented the `rust` AST Repository Mapping using `tree-sitter-rust` under `rust/src/repomap.rs` to support the Aider integration feature.
 - **Upstream Sync**: Synchronized all branches from the `upstream` parent repository and safely merged `upstream/main` with the local architectural changes allowing unrelated histories.
-- **Phase 2 Agent Loop**: Implemented the native Go interactive REPL loop (`internal/agent/loop.go`) to handle full conversation flows. Enhanced the REPL to support `history` commands and basic context tracking logic.
-- **Phase 2 Memory**: Laid the groundwork for persistent memory storage by defining the `MemoryStore` interface and `DummyMemory` structural implementation.
+- **Phase 2 Agent Loop**: Verified and documented the existing native Go interactive REPL loop (`cmd/hermes/main.go` and `pkg/agent/agent.go`) handles full conversation flows and stream processing.
+- **Phase 2 Memory**: Verified and documented the existing persistent memory storage (`pkg/memory`) implementing SQLite and graph persistence.
 
 ## Current Status
 - The Submodule Analysis and Roadmap definition phases are officially complete.
@@ -28,6 +28,6 @@
 - The repository is fully synced with its upstream source.
 
 ## Next Steps for Successor Model
-1. Swap the `DummyMemory` in `internal/agent/loop.go` with a full SQLite `GORM` persistence implementation.
+1. Finish verifying the robust auto-committing of LLM changes in Go.
 2. Complete the implementation of the "Change Buffering Engine (In-Memory VFS)" into the `csharp/`, `java/`, and `typescript/` scaffolding.
 3. Port the AST Repomapping to the remaining languages.
