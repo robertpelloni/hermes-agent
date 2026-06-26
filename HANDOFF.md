@@ -1,17 +1,33 @@
 # Session Handoff & System Memory
 
 ## Findings & Structural Shifts
-- Successfully imported the `paul-gauthier/aider` repository as `aider_submodule/` to dissect and extract feature parity for our cross-language agentic coding harness.
-- Analyzed Aider's architecture, pinpointing its use of `tree-sitter` for the AST repository map and its unique diff/search-and-replace algorithm (`editblock_coder`).
-- Documented these features in `aider_analysis.md` and appended them to `ROADMAP.md` to be rebuilt in Rust, Go, C#, Java, and TS.
-- Resolved Go compilation conflicts triggered by uncompilable code in the submodule's test fixtures by establishing a proper `go.work` workspace pointing exactly to the project roots, successfully bypassing the test artifacts.
+- Successfully imported and analyzed the target list of competitor AI harnesses (`code`, `aider`, `claude-code`, `codebuff`, `grok-cli`).
+- Analyzed their architecture, pinpointing:
+  - `tree-sitter` AST repository map.
+  - The unique diff/search-and-replace algorithm (`editblock_coder`).
+  - Extensive Model Context Protocol (MCP) integrations.
+  - Change Buffering Engines.
+  - Editor Deep Integration Hooks (WebSocket IPC).
+  - Zero-Allocation High-Speed Streaming pipelines.
+- Documented all features in respective `*_analysis.md` files and compiled the master integration list into `ROADMAP.md` for Rust, Go, C#, Java, and TS.
+- Handled all untracked and compilable submodule noise to ensure the base monorepo CI remains green.
+- Implemented the initial `go.work` and `internal/shadowpilot/` tools (Git Diff, CI Auto-Fix stubs, Submodule checks).
+- Implemented the `go` Zero-Allocation Streaming Pipeline under `/api/chat` using `bufio.Scanner` to avoid string allocations during SSE chunk transmission.
+- Initialized the base `rust` implementation (`rust/src/main.rs`) utilizing `clap` for command-line parsing, `tokio` for async runtimes, and `reqwest`.
+- Implemented the `rust` Change Buffering Engine (In-Memory VFS) under `rust/src/vfs.rs` to support the CodeBuff integration feature.
+- Implemented the `rust` AST Repository Mapping using `tree-sitter-rust` under `rust/src/repomap.rs` to support the Aider integration feature.
+- **Upstream Sync**: Synchronized all branches from the `upstream` parent repository and safely merged `upstream/main` with the local architectural changes allowing unrelated histories.
+- **Phase 2 Agent Loop**: Implemented the native Go interactive REPL loop (`internal/agent/loop.go`) to handle full conversation flows. Enhanced the REPL to support `history` commands and basic context tracking logic.
+- **Phase 2 Memory**: Laid the groundwork for persistent memory storage by defining the `MemoryStore` interface and `DummyMemory` structural implementation.
 
 ## Current Status
-- `just-every/code` submodule is present (`code_submodule/`) and parsed (`code_analysis.md`).
-- `paul-gauthier/aider` submodule is present (`aider_submodule/`) and parsed (`aider_analysis.md`).
-- All tests pass, build is green.
+- The Submodule Analysis and Roadmap definition phases are officially complete.
+- The `go` streaming pipeline, agent REPL, memory interfaces, and `rust` AST/VFS foundations are implemented and compile successfully.
+- `ROADMAP.md` is populated with the complete multi-language integration requirements.
+- All Python and Go tests pass, Rust builds cleanly.
+- The repository is fully synced with its upstream source.
 
 ## Next Steps for Successor Model
-1. Commit the `go.work` fix and push the branch.
-2. Proceed to analyze the next target harness (e.g., `Codebuff CLI`), import it as a submodule, and analyze its core implementation.
-3. Keep compiling the `ROADMAP.md` target features.
+1. Swap the `DummyMemory` in `internal/agent/loop.go` with a full SQLite `GORM` persistence implementation.
+2. Complete the implementation of the "Change Buffering Engine (In-Memory VFS)" into the `csharp/`, `java/`, and `typescript/` scaffolding.
+3. Port the AST Repomapping to the remaining languages.

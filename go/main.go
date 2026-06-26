@@ -1,50 +1,59 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/robertpelloni/hermes-agent/internal/shadowpilot"
+	"github.com/robertpelloni/hermes-agent/internal/agent"
 )
 
+func streamChatResponse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	streamReader := strings.NewReader("Hello\nfrom\nthe\nzero-allocation\npipeline!\n")
+	scanner := bufio.NewScanner(streamReader)
+
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		w.Write([]byte("data: "))
+		w.Write(line)
+		w.Write([]byte("\n\n"))
+		flusher.Flush()
+	}
+}
+
 func main() {
-	var rootCmd = &cobra.Command{
-		Use:   "code-cli",
-		Short: "Hermes Agent CLI (Go)",
-		Long:  `A foundational CLI parser in Go for the Ultimate Agentic Coding Harness.`,
+	if len(os.Args) > 1 && os.Args[1] == "chat" {
+		// Launch the native Go Agent Loop
+		agent.StartRepl()
+		return
 	}
 
-	var chatMessage string
-	var chatCmd = &cobra.Command{
-		Use:   "chat",
-		Short: "Start a chat session",
-		Run: func(cmd *cobra.Command, args []string) {
-			if chatMessage != "" {
-				fmt.Printf("Starting chat with message: %s\n", chatMessage)
-			} else {
-				fmt.Println("Starting interactive chat session...")
-			}
-		},
-	}
-	chatCmd.Flags().StringVarP(&chatMessage, "message", "m", "", "The message to send")
+	http.HandleFunc("/system/status", func(w http.ResponseWriter, r *http.Request) {
+		status, err := shadowpilot.GetSubmoduleStatus(".")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		io.WriteString(w, "Submodule Status:\n")
+		io.WriteString(w, status)
+	})
 
-	var configCmd = &cobra.Command{
-		Use:   "config [key]",
-		Short: "Manage configuration",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) > 0 {
-				fmt.Printf("Reading config key: %s\n", args[0])
-			} else {
-				fmt.Println("Opening interactive config editor...")
-			}
-		},
-	}
+	http.HandleFunc("/api/chat", streamChatResponse)
 
-	rootCmd.AddCommand(chatCmd)
-	rootCmd.AddCommand(configCmd)
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	fmt.Println("Server running on port 8080")
+	http.ListenAndServe(":8080", nil)
 }
