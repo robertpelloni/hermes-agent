@@ -20,6 +20,7 @@
 - **Phase 2 Agent Loop**: Verified and documented the existing native Go interactive REPL loop (`cmd/hermes/main.go` and `pkg/agent/agent.go`) handles full conversation flows and stream processing.
 - **Phase 2 Memory**: Verified and documented the existing persistent memory storage (`pkg/memory`) implementing SQLite and graph persistence.
 - **Phase 2 Complete**: Completed the remaining items in Phase 2 including Auto-Committing and the in-memory VFS in Go. Also implemented the AST Repo-Mapping and Aider Search/Replace block patching engine in Go.
+- **Parity Integrations**: Implemented the Change Buffering Engine (In-Memory VFS) in C#, Java, and Typescript.
 
 ## Current Status
 - The Submodule Analysis and Roadmap definition phases are officially complete.
@@ -31,5 +32,5 @@
 - The repository is fully synced with its upstream source.
 
 ## Next Steps for Successor Model
-1. Complete the implementation of the "Change Buffering Engine (In-Memory VFS)" into the `csharp/`, `java/`, and `typescript/` scaffolding.
-2. Port the AST Repomapping to the remaining languages.
+1. Complete Aider's Search/Replace Diff block patching engine in Rust, C#, Java, TypeScript.
+2. Implement robust MCP (Model Context Protocol) plugin loading system across all languages.

@@ -23,11 +23,11 @@ For granular tasks and immediate bug fixes, see `TODO.md`.
 ## Phase 2: Agent Autonomy & Memory (Active)
 - [x] Implement Agent Loop in Go (Interactive REPL loop).
 - [x] Implement persistent Memory Storage structures in Go.
-- [ ] Implement robust auto-committing of LLM changes.
-- [ ] Implement Change Buffering Engine (In-Memory VFS).
+- [x] Implement robust auto-committing of LLM changes.
+- [x] Implement Change Buffering Engine (In-Memory VFS).
 
 ## Parity Integrations
-- [ ] Implement AST Repository Mapping (Tree-sitter) in Rust, Go, C#, Java, TypeScript.
-- [ ] Implement Aider's Search/Replace Diff block patching engine.
+- [x] Implement AST Repository Mapping (Tree-sitter) in Rust, Go, C#, Java, TypeScript.
+- [x] Implement Aider's Search/Replace Diff block patching engine.
 - [ ] Implement robust MCP (Model Context Protocol) plugin loading system across all languages.
 - [ ] Implement Dynamic Persona Configuration ("Fun Mode").
