@@ -21,6 +21,8 @@
 - **Phase 2 Memory**: Verified and documented the existing persistent memory storage (`pkg/memory`) implementing SQLite and graph persistence.
 - **Phase 2 Complete**: Completed the remaining items in Phase 2 including Auto-Committing and the in-memory VFS in Go. Also implemented the AST Repo-Mapping and Aider Search/Replace block patching engine in Go.
 - **Parity Integrations**: Implemented the Change Buffering Engine (In-Memory VFS) in C#, Java, and Typescript.
+- **Parity Integrations**: Implemented the Search/Replace Diff block patching engine in Rust, C#, Java, and Typescript.
+- **Parity Integrations**: Implemented the AST Repomapping in Rust, and created structural stubs for C#, Java, and TS.
 
 ## Current Status
 - The Submodule Analysis and Roadmap definition phases are officially complete.
@@ -32,5 +34,5 @@
 - The repository is fully synced with its upstream source.
 
 ## Next Steps for Successor Model
-1. Complete Aider's Search/Replace Diff block patching engine in Rust, C#, Java, TypeScript.
+1. Complete tree-sitter AST Repomapping logic inside the newly created stubs for C#, Java, TypeScript.
 2. Implement robust MCP (Model Context Protocol) plugin loading system across all languages.

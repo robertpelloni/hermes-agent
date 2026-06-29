@@ -2,16 +2,16 @@ using System;
 
 namespace Hermes
 {
-    public static class Patcher
+    public static class Patch
     {
         public static string ApplyDiffBlock(string content, string searchBlock, string replaceBlock)
         {
-            if (!content.Contains(searchBlock))
+            int index = content.IndexOf(searchBlock, StringComparison.Ordinal);
+            if (index < 0)
             {
-                throw new Exception("Search block not found in file content");
+                throw new Exception("search block not found in file content");
             }
 
-            var index = content.IndexOf(searchBlock);
             return content.Substring(0, index) + replaceBlock + content.Substring(index + searchBlock.Length);
         }
     }
