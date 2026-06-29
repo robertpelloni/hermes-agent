@@ -28,6 +28,6 @@
 - The repository is fully synced with its upstream source.
 
 ## Next Steps for Successor Model
-1. Finish verifying the robust auto-committing of LLM changes in Go.
-2. Complete the implementation of the "Change Buffering Engine (In-Memory VFS)" into the `csharp/`, `java/`, and `typescript/` scaffolding.
+1. Implement robust auto-committing of LLM changes.
+2. Complete the implementation of the \"Change Buffering Engine (In-Memory VFS)\" into the `csharp/`, `java/`, and `typescript/` scaffolding.
 3. Port the AST Repomapping to the remaining languages.
