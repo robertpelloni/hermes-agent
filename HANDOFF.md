@@ -19,15 +19,17 @@
 - **Upstream Sync**: Synchronized all branches from the `upstream` parent repository and safely merged `upstream/main` with the local architectural changes allowing unrelated histories.
 - **Phase 2 Agent Loop**: Verified and documented the existing native Go interactive REPL loop (`cmd/hermes/main.go` and `pkg/agent/agent.go`) handles full conversation flows and stream processing.
 - **Phase 2 Memory**: Verified and documented the existing persistent memory storage (`pkg/memory`) implementing SQLite and graph persistence.
+- **Phase 2 Complete**: Completed the remaining items in Phase 2 including Auto-Committing and the in-memory VFS in Go. Also implemented the AST Repo-Mapping and Aider Search/Replace block patching engine in Go.
 
 ## Current Status
 - The Submodule Analysis and Roadmap definition phases are officially complete.
 - The `go` streaming pipeline, agent REPL, memory interfaces, and `rust` AST/VFS foundations are implemented and compile successfully.
 - `ROADMAP.md` is populated with the complete multi-language integration requirements.
+- Phase 2 for Go is completely implemented and tested.
+- Go AST Repo mapping and Search/Replace block patching engine (Aider) is implemented and tested.
 - All Python and Go tests pass, Rust builds cleanly.
 - The repository is fully synced with its upstream source.
 
 ## Next Steps for Successor Model
-1. Finish verifying the robust auto-committing of LLM changes in Go.
-2. Complete the implementation of the "Change Buffering Engine (In-Memory VFS)" into the `csharp/`, `java/`, and `typescript/` scaffolding.
-3. Port the AST Repomapping to the remaining languages.
+1. Complete the implementation of the "Change Buffering Engine (In-Memory VFS)" into the `csharp/`, `java/`, and `typescript/` scaffolding.
+2. Port the AST Repomapping to the remaining languages.
