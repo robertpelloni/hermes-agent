@@ -37,3 +37,27 @@ func TestApplyDiffBlockNotFound(t *testing.T) {
 		t.Fatalf("expected error, got nil")
 	}
 }
+
+func TestApplyDiffBlockFuzzy(t *testing.T) {
+	content := `func main() {
+    // This is a test
+	fmt.Println("Hello")
+}`
+
+	// Search block with slightly different indentation/whitespace
+	searchBlock := `
+func main() {
+ // This is a test
+ fmt.Println("Hello")
+}
+`
+	replaceBlock := `func main() {
+	fmt.Println("World")
+}`
+
+	_, err := ApplyDiffBlock(content, searchBlock, replaceBlock)
+	// Currently we expect it to find the fuzzy match but error on replacement
+	if err == nil || err.Error() != "search block found via fuzzy match, but fuzzy replacement is not yet implemented" {
+		t.Fatalf("expected fuzzy match error, got %v", err)
+	}
+}
