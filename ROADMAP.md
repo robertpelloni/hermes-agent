@@ -29,5 +29,5 @@ For granular tasks and immediate bug fixes, see `TODO.md`.
 ## Parity Integrations
 - [x] Implement AST Repository Mapping (Tree-sitter) in Rust, Go, C#, Java, TypeScript.
 - [x] Implement Aider's Search/Replace Diff block patching engine.
-- [ ] Implement robust MCP (Model Context Protocol) plugin loading system across all languages.
-- [ ] Implement Dynamic Persona Configuration ("Fun Mode").
+- [x] Implement robust MCP (Model Context Protocol) plugin loading system across all languages.
+- [x] Implement Dynamic Persona Configuration ("Fun Mode").
