@@ -103,7 +103,7 @@ func (a *Agent) SystemPrompt() string {
 // HandleMessage processes an incoming user message through the full agent loop.
 func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string) (string, error) {
 	fmt.Printf("[hermes] Message from %s/%s: %s\n", platform, userID, text)
-	return a.runConversation(ctx, text)
+	return a.runConversation(ctx, platform, userID, text)
 }
 
 // HandleMessageStream processes a user message and streams events on the returned channel.
@@ -112,14 +112,65 @@ func (a *Agent) HandleMessageStream(ctx context.Context, platform, userID, text 
 	ch := make(chan StreamEvent, 64)
 	go func() {
 		defer close(ch)
-		a.handleMessageStreamImpl(ctx, text, ch)
+		a.handleMessageStreamImpl(ctx, platform, userID, text, ch)
 	}()
 	return ch
 }
 
+func (a *Agent) loadHistory(sessionID string) []ai.Message {
+	if a.store == nil {
+		return []ai.Message{}
+	}
+
+	msgs, err := a.store.LoadMessages(sessionID)
+	if err != nil || len(msgs) == 0 {
+		return []ai.Message{}
+	}
+
+	var aiMsgs []ai.Message
+	for _, m := range msgs {
+		var content []ai.Content
+		if err := json.Unmarshal([]byte(m.Content), &content); err != nil {
+			content = []ai.Content{{Type: "text", Text: m.Content}}
+		}
+
+		role := ai.MessageRole(m.Role)
+		aiMsgs = append(aiMsgs, ai.Message{
+			Role:    role,
+			Content: content,
+		})
+	}
+
+	return aiMsgs
+}
+
+func (a *Agent) saveHistory(sessionID string, msg ai.Message) {
+	if a.store == nil {
+		return
+	}
+
+	data, err := json.Marshal(msg.Content)
+	if err != nil {
+		return
+	}
+
+	_ = a.store.SaveMessage(sessionID, string(msg.Role), string(data))
+}
+
 // handleMessageStreamImpl is the goroutine that emits StreamEvents.
-func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch chan<- StreamEvent) {
-	messages := a.buildInitialMessages(userText)
+func (a *Agent) handleMessageStreamImpl(ctx context.Context, platform, userID, userText string, ch chan<- StreamEvent) {
+	sessionID := platform + ":" + userID
+
+	messages := a.loadHistory(sessionID)
+	if len(messages) == 0 {
+		sysMsg := ai.NewTextMessage("system", a.config.SystemPrompt)
+		messages = append(messages, sysMsg)
+		a.saveHistory(sessionID, sysMsg)
+	}
+
+	userMsg := ai.NewTextMessage(ai.RoleUser, userText)
+	messages = append(messages, userMsg)
+	a.saveHistory(sessionID, userMsg)
 
 	for iter := 0; iter < a.config.MaxIterations; iter++ {
 		messages = a.maybeCompact(messages)
@@ -215,7 +266,9 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 		}
 
 		if assistantText != "" {
-			messages = append(messages, ai.NewTextMessage(ai.RoleAssistant, assistantText))
+			msg := ai.NewTextMessage(ai.RoleAssistant, assistantText)
+			messages = append(messages, msg)
+			a.saveHistory(sessionID, msg)
 		}
 
 		// Detect text-based tool calls
@@ -272,7 +325,9 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 						ToolResult: "",
 						ToolError:  err,
 					}
-					messages = append(messages, ai.NewToolResultMessage(tc.ID, tc.Name, err, true))
+					msg := ai.NewToolResultMessage(tc.ID, tc.Name, err, true)
+					messages = append(messages, msg)
+					a.saveHistory(sessionID, msg)
 				} else {
 					// If result is a map or any type, convert to string
 					resultStr := fmt.Sprintf("%v", result)
@@ -282,7 +337,9 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 						ToolID:     tc.ID,
 						ToolResult: resultStr,
 					}
-					messages = append(messages, ai.NewToolResultMessage(tc.ID, tc.Name, result, false))
+					msg := ai.NewToolResultMessage(tc.ID, tc.Name, result, false)
+					messages = append(messages, msg)
+					a.saveHistory(sessionID, msg)
 				}
 			}
 
@@ -305,9 +362,19 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 // 2. Call AI for streaming response
 // 3. Handle tool calls
 // 4. Repeat until text response
-func (a *Agent) runConversation(ctx context.Context, userText string) (string, error) {
-	// Build initial message list
-	messages := a.buildInitialMessages(userText)
+func (a *Agent) runConversation(ctx context.Context, platform, userID, userText string) (string, error) {
+	sessionID := platform + ":" + userID
+
+	messages := a.loadHistory(sessionID)
+	if len(messages) == 0 {
+		sysMsg := ai.NewTextMessage("system", a.config.SystemPrompt)
+		messages = append(messages, sysMsg)
+		a.saveHistory(sessionID, sysMsg)
+	}
+
+	userMsg := ai.NewTextMessage(ai.RoleUser, userText)
+	messages = append(messages, userMsg)
+	a.saveHistory(sessionID, userMsg)
 
 	// Main conversation loop
 	var finalResponse string
@@ -397,7 +464,9 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 
 		// Add assistant message to history
 		if assistantText != "" {
-			messages = append(messages, ai.NewTextMessage(ai.RoleAssistant, assistantText))
+			msg := ai.NewTextMessage(ai.RoleAssistant, assistantText)
+			messages = append(messages, msg)
+			a.saveHistory(sessionID, msg)
 		}
 
 		// Handle tool calls – check both structured tool_calls and text-based tool calls
@@ -441,19 +510,25 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 
 			// Add tool call message to history
 			for _, tc := range pendingToolCalls {
-				messages = append(messages, ai.NewTextMessage(
+				msg := ai.NewTextMessage(
 					ai.RoleAssistant,
 					fmt.Sprintf("[Using tool: %s]", tc.Name),
-				))
+				)
+				messages = append(messages, msg)
+				a.saveHistory(sessionID, msg)
 			}
 
 			// Execute each tool call
 			for _, tc := range pendingToolCalls {
 				result, err := toolregistry.Global().Call(tc.Name, tc.Arguments, map[string]any{})
 				if err != nil {
-					messages = append(messages, ai.NewToolResultMessage(tc.ID, tc.Name, err, true))
+					msg := ai.NewToolResultMessage(tc.ID, tc.Name, err, true)
+					messages = append(messages, msg)
+					a.saveHistory(sessionID, msg)
 				} else {
-					messages = append(messages, ai.NewToolResultMessage(tc.ID, tc.Name, result, false))
+					msg := ai.NewToolResultMessage(tc.ID, tc.Name, result, false)
+					messages = append(messages, msg)
+					a.saveHistory(sessionID, msg)
 				}
 			}
 
