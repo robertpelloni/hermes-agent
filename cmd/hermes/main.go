@@ -199,7 +199,8 @@ func main() {
 	case "agent":
 		// Agent mode – run the Go agent interactively via stdin/stdout.
 		fmt.Println("running Go agent interactively. type '/quit' or '/exit' to stop.")
-		ag := agent.New(agent.DefaultConfig())
+		memStoreAgent := memory.NewStore()
+		ag := agent.New(agent.DefaultConfig(), memStoreAgent)
 		if err := ag.Run(ctx); err != nil {
 			log.Printf("agent run error: %v", err)
 		}
@@ -286,7 +287,7 @@ func main() {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
 	}
 
-	ag := agent.New(agent.DefaultConfig())
+	ag := agent.New(agent.DefaultConfig(), memStore)
 
 	// Start MCP server in background
 	go func() {

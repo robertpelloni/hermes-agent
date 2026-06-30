@@ -10,6 +10,7 @@ import (
 
 	"github.com/robertpelloni/hermes-agent/pkg/ai"
 	"github.com/robertpelloni/hermes-agent/pkg/aiclient"
+	"github.com/robertpelloni/hermes-agent/pkg/memory"
 	"github.com/robertpelloni/hermes-agent/pkg/prompttemplates"
 	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
@@ -18,6 +19,7 @@ import (
 type Agent struct {
 	config   Config
 	running  bool
+	store    *memory.Store
 }
 
 // Config holds agent configuration.
@@ -82,8 +84,8 @@ func getEnvDefaultInt(key string, fallback int) int {
 }
 
 // New creates a new Hermes Agent.
-func New(cfg Config) *Agent {
-	return &Agent{config: cfg, running: false}
+func New(cfg Config, store *memory.Store) *Agent {
+	return &Agent{config: cfg, running: false, store: store}
 }
 
 // Run starts the agent's main loop (no-op for now; the agent is driven per-message).
