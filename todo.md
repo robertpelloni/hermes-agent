@@ -29,7 +29,7 @@
 - [ ] auto-reconnect if dashboard crashes
 - [ ] logging to file instead of stdout
 - [ ] config file (yaml or json) for desktop-specific settings
-- [ ] graceful shutdown with timeout (kill subprocess after 10s)
+- [x] graceful shutdown with timeout (kill subprocess after 10s)
 
 ## features integrated from other harnesses
 - [x] tool parity catalog (hyperharness compat package)

@@ -147,7 +147,7 @@ func main() {
 			}
 			fmt.Printf("  starting dashboard on http://127.0.0.1:%s ...\n", port)
 
-			dashboardCmd = exec.CommandContext(ctx, py, args...)
+			dashboardCmd = exec.Command(py, args...)
 			dashboardCmd.Dir = root
 			dashboardCmd.Stdout = os.Stdout
 			dashboardCmd.Stderr = os.Stderr
@@ -156,6 +156,25 @@ func main() {
 			if err := dashboardCmd.Start(); err != nil {
 				log.Fatalf("failed to start dashboard: %v", err)
 			}
+
+			go func() {
+				<-ctx.Done()
+				if dashboardCmd.Process != nil {
+					_ = dashboardCmd.Process.Signal(os.Interrupt)
+
+					done := make(chan struct{})
+					go func() {
+						_ = dashboardCmd.Wait()
+						close(done)
+					}()
+
+					select {
+					case <-done:
+					case <-time.After(10 * time.Second):
+						_ = dashboardCmd.Process.Kill()
+					}
+				}
+			}()
 
 			fmt.Print("  waiting for server")
 			for i := 0; i < 60; i++ {
