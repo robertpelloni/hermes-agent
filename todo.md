@@ -11,16 +11,16 @@
 - [ ] verify dashboard detection skips re-spawn when already running
 
 ## near-term (this week)
-- [ ] implement agent loop (pkg/agent/agent.go) - basic conversation handling
-- [ ] implement memory store with sqlite persistence (pkg/memory/memory.go)
-- [ ] add basic skill loader that discovers .py files in skills/
+- [x] implement agent loop (pkg/agent/agent.go) - basic conversation handling
+- [x] implement memory store with sqlite persistence (pkg/memory/memory.go)
+- [x] add basic skill loader that discovers .py files in skills/
 - [ ] test go test ./pkg/... ./cmd/... passes
 
 ## medium-term
-- [ ] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
-- [ ] implement mcp server with basic tool registration (pkg/mcp/mcp.go)
-- [ ] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go)
-- [ ] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
+- [x] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
+- [x] implement mcp server with basic tool registration (pkg/mcp/mcp.go)
+- [x] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go)
+- [x] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
 - [ ] integrate pi-ai multi-provider API from pi-mono
 - [ ] integrate pi-agent-core event streaming from pi-mono
 
@@ -29,7 +29,7 @@
 - [ ] auto-reconnect if dashboard crashes
 - [ ] logging to file instead of stdout
 - [ ] config file (yaml or json) for desktop-specific settings
-- [ ] graceful shutdown with timeout (kill subprocess after 10s)
+- [x] graceful shutdown with timeout (kill subprocess after 10s)
 
 ## features integrated from other harnesses
 - [x] tool parity catalog (hyperharness compat package)

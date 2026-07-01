@@ -10,21 +10,21 @@
 - [x] initializes go subsystems (stubs)
 
 ## phase 2: go subsystem expansion (next)
-- [ ] agent loop: implement full conversation handling in go
-- [ ] memory store: persistent sqlite or file-based memory
-- [ ] skill loader: discover and load .py skills from skills/
-- [ ] gateway: implement telegram/discord cli platforms
-- [ ] mcp server: full model context protocol implementation
-- [ ] scheduler: cron-like job execution
+- [x] agent loop: implement full conversation handling in go
+- [x] memory store: persistent sqlite or file-based memory
+- [x] skill loader: discover and load .py skills from skills/
+- [x] gateway: implement telegram/discord cli platforms
+- [x] mcp server: full model context protocol implementation
+- [x] scheduler: cron-like job execution
 
 ## phase 3: hybrid operation
 - [ ] go app can run standalone (no python needed for basic tasks)
-- [ ] go app delegates complex tasks to python backend
-- [ ] bi-directional communication between go and python
+- [x] go app delegates complex tasks to python backend
+- [x] bi-directional communication between go and python
 
 ## phase 4: native desktop features
-- [ ] system tray integration
-- [ ] native notifications
+- [x] system tray integration
+- [x] native notifications
 - [ ] global hotkey activation
 - [ ] auto-start on boot
 - [ ] settings gui (not just web dashboard)

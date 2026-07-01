@@ -29,8 +29,8 @@ go desktop app built and tested as a python hermes dashboard launcher. merged 34
 - branch: main (up to date with both origin and upstream)
 
 ## next steps (for next model)
-1. implement agent loop in pkg/agent/agent.go (basic conversation handling)
-2. implement sqlite-based memory persistence in pkg/memory/memory.go
+1. [COMPLETED] implement agent loop in pkg/agent/agent.go
+2. [COMPLETED] implement sqlite-based memory persistence in pkg/memory/memory.go
 3. run go tests: go test ./pkg/... ./cmd/...
 4. push any commits to origin
 5. check if dashboard still running, restart if needed

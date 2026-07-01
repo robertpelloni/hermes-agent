@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
+	"github.com/robertpelloni/hermes-agent/pkg/memory"
 )
 
 // sseEvent formats a JSON object as an SSE data: line.
@@ -74,7 +75,8 @@ func TestAgentEndToEnd(t *testing.T) {
 		SessionTTL:    time.Hour,
 	}
 
-	ag := agent.New(cfg)
+	store := memory.NewStore()
+	ag := agent.New(cfg, store)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -162,7 +164,8 @@ func TestAgentWithToolCallDetection(t *testing.T) {
 		SessionTTL:    time.Hour,
 	}
 
-	ag := agent.New(cfg)
+	store := memory.NewStore()
+	ag := agent.New(cfg, store)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -223,7 +226,8 @@ func TestAgentMaxIterations(t *testing.T) {
 		SessionTTL:    time.Hour,
 	}
 
-	ag := agent.New(cfg)
+	store := memory.NewStore()
+	ag := agent.New(cfg, store)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -294,7 +298,8 @@ func TestIntegrationWithRealLLM(t *testing.T) {
 	}
 
 	cfg := agent.DefaultConfig()
-	ag := agent.New(cfg)
+	store := memory.NewStore()
+	ag := agent.New(cfg, store)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
