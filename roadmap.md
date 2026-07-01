@@ -23,8 +23,8 @@
 - [x] bi-directional communication between go and python
 
 ## phase 4: native desktop features
-- [ ] system tray integration
-- [ ] native notifications
+- [x] system tray integration
+- [x] native notifications
 - [ ] global hotkey activation
 - [ ] auto-start on boot
 - [ ] settings gui (not just web dashboard)
