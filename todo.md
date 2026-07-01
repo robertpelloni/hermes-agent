@@ -13,7 +13,7 @@
 ## near-term (this week)
 - [x] implement agent loop (pkg/agent/agent.go) - basic conversation handling
 - [x] implement memory store with sqlite persistence (pkg/memory/memory.go)
-- [ ] add basic skill loader that discovers .py files in skills/
+- [x] add basic skill loader that discovers .py files in skills/
 - [ ] test go test ./pkg/... ./cmd/... passes
 
 ## medium-term

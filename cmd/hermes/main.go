@@ -25,6 +25,7 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/orchestration"
 	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
+	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
 func findPython() (string, error) {
@@ -286,6 +287,11 @@ func main() {
 	pluginMgr := plugin.NewManager()
 	if discovered, err := pluginMgr.Discover(); err == nil && len(discovered) > 0 {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
+	}
+
+	skillRepo := skill.Global()
+	if err := skillRepo.DiscoverAndLoad(filepath.Join(root, "skills")); err == nil {
+		fmt.Printf("  skills loaded: %d\n", len(skillRepo.List()))
 	}
 
 	ag := agent.New(agent.DefaultConfig(), memStore)
