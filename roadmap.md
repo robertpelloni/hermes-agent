@@ -19,8 +19,8 @@
 
 ## phase 3: hybrid operation
 - [ ] go app can run standalone (no python needed for basic tasks)
-- [ ] go app delegates complex tasks to python backend
-- [ ] bi-directional communication between go and python
+- [x] go app delegates complex tasks to python backend
+- [x] bi-directional communication between go and python
 
 ## phase 4: native desktop features
 - [ ] system tray integration
