@@ -326,7 +326,7 @@ export function ChatSidebar({ channel, className }: ChatSidebarProps) {
           </Button>
         </div>
 
-        <Badge tone={STATE_TONE[state]}>{STATE_LABEL[state]}</Badge>
+        <Badge tone={STATE_TONE[state]} title="Current status of the conversation connection">{STATE_LABEL[state]}</Badge>
       </Card>
 
       {banner && (
@@ -352,7 +352,7 @@ export function ChatSidebar({ channel, className }: ChatSidebarProps) {
       )}
 
       <Card className="flex min-h-0 flex-none flex-col px-2 py-2">
-        <div className="text-display px-1 pb-2 text-xs tracking-wider text-text-tertiary">
+        <div className="text-display px-1 pb-2 text-xs tracking-wider text-text-tertiary" title="Active and previous tool executions by the agent">
           tools
         </div>
 

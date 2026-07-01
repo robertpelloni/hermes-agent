@@ -199,8 +199,8 @@ func main() {
 	case "agent":
 		// Agent mode – run the Go agent interactively via stdin/stdout.
 		fmt.Println("running Go agent interactively. type '/quit' or '/exit' to stop.")
-		memStoreAgent := memory.NewStore()
-		ag := agent.New(agent.DefaultConfig(), memStoreAgent)
+		memStore := memory.NewStore()
+		ag := agent.New(agent.DefaultConfig(), memStore)
 		if err := ag.Run(ctx); err != nil {
 			log.Printf("agent run error: %v", err)
 		}
@@ -225,6 +225,7 @@ func main() {
 				fmt.Println(resp)
 			}
 		}
+		return
 		return
 
 	case "foundation":

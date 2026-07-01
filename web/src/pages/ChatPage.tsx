@@ -257,7 +257,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
         ghost
         onClick={() => setMobilePanelOpenRaw(true)}
         aria-expanded={mobilePanelOpen}
-        aria-controls="chat-side-panel"
+        aria-controls="chat-side-panel" title="Toggle Tool Parity Catalog and Subsystems panel"
         className={cn(
           "shrink-0 rounded border border-current/20",
           "px-2 py-1 text-xs font-medium tracking-wide",
