@@ -5,7 +5,7 @@
 ### architecture
 - python hermes-agent is the core implementation (~12k loc in run_agent.py)
 - go desktop app is a thin wrapper/launcher (currently ~150 loc in cmd/hermes/main.go)
-- go packages are stubs: agent, gateway, mcp, memory, scheduler, skill
+- go packages are mostly implemented: agent loop, gateway CLI, sqlite memory, python skill loader
 
 ### build system
 - python: uses uv/pip, venv in .venv/ or venv/
@@ -37,3 +37,8 @@
 - dashboard already running on 9120 from previous sessions
 - go binary uses system python, not venv python
 - start.bat updated to reference hermes-desktop.exe (was hermes-agent-go.exe)
+### Go Subsystems
+- The agent loop is implemented in pkg/agent/agent.go and replaces the old stub.
+- Memory persistence is handled via SQLite in pkg/memory/sqlite_store.go.
+- Gateway cli is fully implemented for reading stdin and routing to agent.
+- Skill loader can discover python files in skills/ directory.
