@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -205,27 +204,14 @@ func main() {
 		if err := ag.Run(ctx); err != nil {
 			log.Printf("agent run error: %v", err)
 		}
-		scanner := bufio.NewScanner(os.Stdin)
-		for {
-			fmt.Print("\n> ")
-			if !scanner.Scan() {
-				break
-			}
-			line := strings.TrimSpace(scanner.Text())
-			if line == "" {
-				continue
-			}
-			if line == "/quit" || line == "/exit" {
-				fmt.Println("exiting agent")
-				break
-			}
-			resp, err := ag.HandleMessage(ctx, "cli", "local", line)
-			if err != nil {
-				fmt.Printf("Error: %v\n", err)
-			} else {
-				fmt.Println(resp)
-			}
-		}
+		// Delegate to gateway
+		gw := gateway.New(ag)
+		_ = gw.Start(ctx)
+
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+		<-sigCh
+		gw.Stop()
 		return
 		return
 
