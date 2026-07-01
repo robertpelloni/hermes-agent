@@ -14,8 +14,8 @@
 - [x] memory store: persistent sqlite or file-based memory
 - [x] skill loader: discover and load .py skills from skills/
 - [x] gateway: implement telegram/discord cli platforms
-- [ ] mcp server: full model context protocol implementation
-- [ ] scheduler: cron-like job execution
+- [x] mcp server: full model context protocol implementation
+- [x] scheduler: cron-like job execution
 
 ## phase 3: hybrid operation
 - [ ] go app can run standalone (no python needed for basic tasks)
