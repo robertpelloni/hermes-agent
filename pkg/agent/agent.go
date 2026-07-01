@@ -53,8 +53,8 @@ func DefaultConfig() Config {
 	}
 
 	return Config{
-		Model:         "free-llm",
-		Provider:      "local-llm",
+		Model:         getEnvDefault("HERMES_MODEL", "free-llm"),
+		Provider:      getEnvDefault("HERMES_PROVIDER", "local-llm"),
 		APIKey:        apiKey,
 		BaseURL:       fmt.Sprintf("http://127.0.0.1:%s/v1", getEnvDefault("HERMES_FREE_LLM_PORT", "4000")),
 		MaxTokens:     4096,
