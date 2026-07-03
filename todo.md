@@ -21,8 +21,8 @@
 - [x] implement mcp server with basic tool registration (pkg/mcp/mcp.go)
 - [x] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go)
 - [x] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
-- [ ] integrate pi-ai multi-provider API from pi-mono
-- [ ] integrate pi-agent-core event streaming from pi-mono
+- [x] integrate pi-ai multi-provider API from pi-mono
+- [x] integrate pi-agent-core event streaming from pi-mono
 
 ## optional/nice-to-have
 - [ ] system tray icon for windows
@@ -40,4 +40,3 @@
 - [ ] pi-ai unified multi-provider API (pi-mono packages/ai)
 - [ ] pi-agent-core agent runtime (pi-mono packages/agent)
 - [ ] pi-tui differential rendering (pi-mono packages/tui)
-- [ ] pi-web-ui web components (pi-mono packages/web-ui)- [ ] replace placeholder conversation handler in the agent loop (pkg/agent/stub_handler.go) with full logic
