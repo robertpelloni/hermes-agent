@@ -14,7 +14,7 @@
 - [x] implement agent loop (pkg/agent/agent.go) - basic conversation handling
 - [x] implement memory store with sqlite persistence (pkg/memory/memory.go)
 - [x] add basic skill loader that discovers .py files in skills/
-- [ ] test go test ./pkg/... ./cmd/... passes
+- [x] test go test ./pkg/... ./cmd/... passes
 
 ## medium-term
 - [x] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
@@ -40,4 +40,4 @@
 - [ ] pi-ai unified multi-provider API (pi-mono packages/ai)
 - [ ] pi-agent-core agent runtime (pi-mono packages/agent)
 - [ ] pi-tui differential rendering (pi-mono packages/tui)
-- [ ] pi-web-ui web components (pi-mono packages/web-ui)
+- [ ] pi-web-ui web components (pi-mono packages/web-ui)- [ ] replace placeholder conversation handler in the agent loop (pkg/agent/stub_handler.go) with full logic
