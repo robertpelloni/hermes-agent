@@ -14,7 +14,7 @@
 - [x] memory store: persistent sqlite or file-based memory
 - [x] skill loader: discover and load .py skills from skills/
 - [x] gateway: implement telegram/discord cli platforms
-- [x] mcp server: full model context protocol implementation
+- [ ] mcp server: full model context protocol implementation
 - [ ] scheduler: cron-like job execution
 
 ## phase 3: hybrid operation
