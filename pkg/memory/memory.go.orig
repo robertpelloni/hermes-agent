@@ -32,18 +32,6 @@ func (s *Store) Store(key, value string) {
 	fmt.Printf("[hermes:memory] Stored: %s\n", key)
 }
 
-// StoreUsageAttribution logs usage attribution per model.
-// It satisfies the supervisor's Phase 2 request for model-switching token tracking.
-func (s *Store) StoreUsageAttribution(sessionID, model string, tokens, durationMs int) error {
-	if s.sqliteDB != nil {
-		_, err := s.sqliteDB.db.Exec(`INSERT INTO model_usage (session_id, model, tokens_used, duration_ms, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-			sessionID, model, tokens, durationMs)
-		return err
-	}
-	fmt.Printf("[hermes:memory] Stored model usage for %s: %s (%d tokens, %d ms)\n", sessionID, model, tokens, durationMs)
-	return nil
-}
-
 // Recall retrieves a memory item.
 func (s *Store) Recall(key string) (string, bool) {
 	s.mu.RLock()
