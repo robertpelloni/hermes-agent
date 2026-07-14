@@ -15,8 +15,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	skinpkg "github.com/robertpelloni/hermes-agent/hermes_cli/skin"
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
-	"github.com/robertpelloni/hermes-agent/pkg/memory"
-	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
 // transcriptItem implements list.Item – each line of the conversation is a separate item.
@@ -110,11 +108,7 @@ func NewModel() *Model {
 	pl.SetShowHelp(false)
 	pl.DisableQuitKeybindings()
 
-	memStore := memory.NewStore()
-	ag := agent.New(agent.DefaultConfig(), memStore)
-
-	skillRepo := skill.Global()
-	_ = skillRepo.DiscoverAndLoad(filepath.Join(os.Getenv("HERMES_HOME"), "skills"))
+	ag := agent.New(agent.DefaultConfig())
 
 	// Load skin name from $HERMES_HOME/config.yaml (display.skin: <name>)
 	skinName := skinpkg.DefaultName()

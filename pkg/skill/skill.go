@@ -1,6 +1,7 @@
 package skill
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -28,8 +29,7 @@ func (r *Repository) Register(s *Skill) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.skills[s.Name] = s
-	// Use debug or omit print in loop to avoid console spam
-	// fmt.Printf("[hermes:skill] Registered: %s\n", s.Name)
+	fmt.Printf("[hermes:skill] Registered: %s\n", s.Name)
 }
 
 // Lookup finds a skill by name.

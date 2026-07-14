@@ -11,25 +11,25 @@
 - [ ] verify dashboard detection skips re-spawn when already running
 
 ## near-term (this week)
-- [x] implement agent loop (pkg/agent/agent.go) - basic conversation handling
-- [x] implement memory store with sqlite persistence (pkg/memory/memory.go)
-- [x] add basic skill loader that discovers .py files in skills/
-- [x] test go test ./pkg/... ./cmd/... passes
+- [ ] implement agent loop (pkg/agent/agent.go) - basic conversation handling
+- [ ] implement memory store with sqlite persistence (pkg/memory/memory.go)
+- [ ] add basic skill loader that discovers .py files in skills/
+- [ ] test go test ./pkg/... ./cmd/... passes
 
 ## medium-term
-- [x] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
-- [x] implement mcp server with basic tool registration (pkg/mcp/mcp.go)
-- [x] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go)
-- [x] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
-- [x] integrate pi-ai multi-provider API from pi-mono
-- [x] integrate pi-agent-core event streaming from pi-mono
+- [ ] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
+- [ ] implement mcp server with basic tool registration (pkg/mcp/mcp.go)
+- [ ] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go)
+- [ ] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
+- [ ] integrate pi-ai multi-provider API from pi-mono
+- [ ] integrate pi-agent-core event streaming from pi-mono
 
 ## optional/nice-to-have
 - [ ] system tray icon for windows
 - [ ] auto-reconnect if dashboard crashes
 - [ ] logging to file instead of stdout
 - [ ] config file (yaml or json) for desktop-specific settings
-- [x] graceful shutdown with timeout (kill subprocess after 10s)
+- [ ] graceful shutdown with timeout (kill subprocess after 10s)
 
 ## features integrated from other harnesses
 - [x] tool parity catalog (hyperharness compat package)
@@ -40,3 +40,4 @@
 - [ ] pi-ai unified multi-provider API (pi-mono packages/ai)
 - [ ] pi-agent-core agent runtime (pi-mono packages/agent)
 - [ ] pi-tui differential rendering (pi-mono packages/tui)
+- [ ] pi-web-ui web components (pi-mono packages/web-ui)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -24,7 +25,6 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/orchestration"
 	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
-	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
 func findPython() (string, error) {
@@ -147,7 +147,7 @@ func main() {
 			}
 			fmt.Printf("  starting dashboard on http://127.0.0.1:%s ...\n", port)
 
-			dashboardCmd = exec.Command(py, args...)
+			dashboardCmd = exec.CommandContext(ctx, py, args...)
 			dashboardCmd.Dir = root
 			dashboardCmd.Stdout = os.Stdout
 			dashboardCmd.Stderr = os.Stderr
@@ -156,25 +156,6 @@ func main() {
 			if err := dashboardCmd.Start(); err != nil {
 				log.Fatalf("failed to start dashboard: %v", err)
 			}
-
-			go func() {
-				<-ctx.Done()
-				if dashboardCmd.Process != nil {
-					_ = dashboardCmd.Process.Signal(os.Interrupt)
-
-					done := make(chan struct{})
-					go func() {
-						_ = dashboardCmd.Wait()
-						close(done)
-					}()
-
-					select {
-					case <-done:
-					case <-time.After(10 * time.Second):
-						_ = dashboardCmd.Process.Kill()
-					}
-				}
-			}()
 
 			fmt.Print("  waiting for server")
 			for i := 0; i < 60; i++ {
@@ -218,20 +199,31 @@ func main() {
 	case "agent":
 		// Agent mode – run the Go agent interactively via stdin/stdout.
 		fmt.Println("running Go agent interactively. type '/quit' or '/exit' to stop.")
-		memStore := memory.NewStore()
-		ag := agent.New(agent.DefaultConfig(), memStore)
+		ag := agent.New(agent.DefaultConfig())
 		if err := ag.Run(ctx); err != nil {
 			log.Printf("agent run error: %v", err)
 		}
-		// Delegate to gateway
-		gw := gateway.New(ag)
-		_ = gw.Start(ctx)
-
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-		<-sigCh
-		gw.Stop()
-		return
+		scanner := bufio.NewScanner(os.Stdin)
+		for {
+			fmt.Print("\n> ")
+			if !scanner.Scan() {
+				break
+			}
+			line := strings.TrimSpace(scanner.Text())
+			if line == "" {
+				continue
+			}
+			if line == "/quit" || line == "/exit" {
+				fmt.Println("exiting agent")
+				break
+			}
+			resp, err := ag.HandleMessage(ctx, "cli", "local", line)
+			if err != nil {
+				fmt.Printf("Error: %v\n", err)
+			} else {
+				fmt.Println(resp)
+			}
+		}
 		return
 
 	case "foundation":
@@ -294,12 +286,7 @@ func main() {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
 	}
 
-	skillRepo := skill.Global()
-	if err := skillRepo.DiscoverAndLoad(filepath.Join(root, "skills")); err == nil {
-		fmt.Printf("  skills loaded: %d\n", len(skillRepo.List()))
-	}
-
-	ag := agent.New(agent.DefaultConfig(), memStore)
+	ag := agent.New(agent.DefaultConfig())
 
 	// Start MCP server in background
 	go func() {
