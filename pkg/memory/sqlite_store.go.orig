@@ -25,11 +25,8 @@ type sqliteDB struct {
 
 // initSQLite opens (or creates) the SQLite memory database.
 func initSQLite() *sqliteDB {
-	path := os.Getenv("HERMES_DB_PATH")
-	if path == "" {
-		home, _ := os.UserHomeDir()
-		path = filepath.Join(home, ".hermes", "sessions.db")
-	}
+	home, _ := os.UserHomeDir()
+	path := filepath.Join(home, ".hermes", "sessions.db")
 
 	os.MkdirAll(filepath.Dir(path), 0755)
 	db, err := sql.Open("sqlite", path+"?_journal_mode=WAL&_busy_timeout=5000")
