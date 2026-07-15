@@ -71,6 +71,13 @@ func (s *sqliteDB) ensureSchema() error {
 			duration_ms INTEGER NOT NULL,
 			created_at DATETIME NOT NULL
 		);`,
+		`CREATE TABLE IF NOT EXISTS session_state (
+			session_id TEXT NOT NULL,
+			key TEXT NOT NULL,
+			value TEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			PRIMARY KEY (session_id, key)
+		);`,
 		`CREATE INDEX IF NOT EXISTS idx_messages_session ON conversations(session_id);`,
 	}
 	for _, q := range queries {

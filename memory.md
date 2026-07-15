@@ -37,3 +37,6 @@
 - dashboard already running on 9120 from previous sessions
 - go binary uses system python, not venv python
 - start.bat updated to reference hermes-desktop.exe (was hermes-agent-go.exe)
+## Schema gaps
+- The Go SQLite memory schema currently tracks simple session_state (key-value strings) for token context, but does not yet sync complex objects directly with the Python `sessions` table.
+- Conflict resolution between Go's `session_state` and Python's session history (e.g., merging edits made concurrently) is not implemented.
