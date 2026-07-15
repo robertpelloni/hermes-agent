@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 	"github.com/robertpelloni/hermes-agent/pkg/memory"
 )
@@ -13,21 +12,15 @@ func (a *Agent) RunConversationLoop(ctx context.Context, platform, userID, text 
 	start := time.Now()
 	fmt.Printf("[hermes] processing msg from %s/%s: %s\n", platform, userID, text)
 
-	model := os.Getenv("HERMES_MODEL")
-	if model == "" {
-		model = "hermes-default-model"
-	}
-	provider := os.Getenv("HERMES_PROVIDER")
-
 	// Simulate conversation logic and model execution
-	response := fmt.Sprintf("I received your message on %s (via %s/%s): %s", platform, provider, model, text)
+	response := fmt.Sprintf("I received your message on %s: %s", platform, text)
 
 	// Track token usage logic per-model (e.g. simulated tokens here)
 	tokensUsed := len(text) + len(response)
 	durationMs := int(time.Since(start).Milliseconds())
 
 	if memStore != nil {
-		memStore.StoreUsageAttribution(fmt.Sprintf("%s-%s", platform, userID), model, tokensUsed, durationMs)
+		memStore.StoreUsageAttribution(fmt.Sprintf("%s-%s", platform, userID), "hermes-default-model", tokensUsed, durationMs)
 	}
 
 	return response, nil
