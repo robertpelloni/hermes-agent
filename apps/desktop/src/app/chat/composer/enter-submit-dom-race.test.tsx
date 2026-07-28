@@ -54,13 +54,11 @@ function Harness({
   }
 
   const submitDraft = () => {
-    if (disabled) {
-      return
-    }
-
     const editor = editorRef.current
+
     if (editor) {
       const domText = composerPlainText(editor)
+
       if (domText !== draftRef.current) {
         draftRef.current = domText
         setDraft(domText)
@@ -69,6 +67,16 @@ function Harness({
 
     const text = draftRef.current
     const payloadPresent = text.trim().length > 0 || attachments.length > 0
+
+    if (disabled) {
+      // Gateway down: queue the draft instead of dropping it (mirrors the real
+      // queueCurrentDraft, which no-ops on an empty payload).
+      if (payloadPresent) {
+        onQueue(text)
+      }
+
+      return
+    }
 
     if (busy) {
       if (payloadPresent) {
@@ -91,6 +99,10 @@ function Harness({
       const hasLivePayload = editorText.trim().length > 0 || attachments.length > 0
 
       if (disabled) {
+        if (hasLivePayload) {
+          submitDraft()
+        }
+
         return
       }
 
@@ -127,9 +139,11 @@ function Harness({
 describe('composer Enter submit — live DOM vs stale composer state (#39630)', () => {
   it('sends the just-typed text on Enter even when composer state has not synced', async () => {
     const onSubmit = vi.fn()
+
     const { getByTestId } = render(
       <Harness onCancel={vi.fn()} onDrain={vi.fn()} onQueue={vi.fn()} onSubmit={onSubmit} />
     )
+
     const editor = getByTestId('editor')
 
     // Fast typing: the DOM has the text but NO input event fired, so `draft`
@@ -146,9 +160,11 @@ describe('composer Enter submit — live DOM vs stale composer state (#39630)', 
     const onQueue = vi.fn()
     const onDrain = vi.fn()
     const onCancel = vi.fn()
+
     const { getByTestId } = render(
       <Harness busy onCancel={onCancel} onDrain={onDrain} onQueue={onQueue} onSubmit={vi.fn()} queued={['queued-1']} />
     )
+
     const editor = getByTestId('editor')
 
     await act(async () => {
@@ -165,9 +181,11 @@ describe('composer Enter submit — live DOM vs stale composer state (#39630)', 
     const onCancel = vi.fn()
     const onSubmit = vi.fn()
     const onQueue = vi.fn()
+
     const { getByTestId } = render(
       <Harness busy onCancel={onCancel} onDrain={vi.fn()} onQueue={onQueue} onSubmit={onSubmit} />
     )
+
     const editor = getByTestId('editor')
 
     await act(async () => {
@@ -183,9 +201,11 @@ describe('composer Enter submit — live DOM vs stale composer state (#39630)', 
   it('drains the next queued prompt on Enter when idle with a truly empty editor', async () => {
     const onDrain = vi.fn()
     const onSubmit = vi.fn()
+
     const { getByTestId } = render(
       <Harness onCancel={vi.fn()} onDrain={onDrain} onQueue={vi.fn()} onSubmit={onSubmit} queued={['queued-1']} />
     )
+
     const editor = getByTestId('editor')
 
     await act(async () => {
@@ -197,12 +217,22 @@ describe('composer Enter submit — live DOM vs stale composer state (#39630)', 
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it('keeps reconnect drafts editable but blocks Enter submit until the gateway returns', async () => {
+  it('queues a reconnect draft on Enter (not send/drain) so it flushes when the gateway returns', async () => {
     const onSubmit = vi.fn()
     const onDrain = vi.fn()
+    const onQueue = vi.fn()
+
     const { getByTestId } = render(
-      <Harness disabled onCancel={vi.fn()} onDrain={onDrain} onQueue={vi.fn()} onSubmit={onSubmit} queued={['queued-1']} />
+      <Harness
+        disabled
+        onCancel={vi.fn()}
+        onDrain={onDrain}
+        onQueue={onQueue}
+        onSubmit={onSubmit}
+        queued={['queued-1']}
+      />
     )
+
     const editor = getByTestId('editor')
 
     await act(async () => {
@@ -211,8 +241,32 @@ describe('composer Enter submit — live DOM vs stale composer state (#39630)', 
       fireEvent.keyDown(editor, { key: 'Enter' })
     })
 
-    expect(editor.textContent).toBe('draft while reconnecting')
-    expect(onDrain).not.toHaveBeenCalled()
+    // The gateway is down, so the message can't send — but it must NOT be
+    // silently dropped (the #-bug: "type, hit Enter, nothing happens, no
+    // error"). It queues, and the gateway-open-gated auto-drain sends it later.
+    expect(onQueue).toHaveBeenCalledWith('draft while reconnecting')
     expect(onSubmit).not.toHaveBeenCalled()
+    expect(onDrain).not.toHaveBeenCalled()
+  })
+
+  it('treats an empty Enter while reconnecting as a no-op (no phantom queue entry)', async () => {
+    const onQueue = vi.fn()
+    const onSubmit = vi.fn()
+    const onDrain = vi.fn()
+
+    const { getByTestId } = render(
+      <Harness disabled onCancel={vi.fn()} onDrain={onDrain} onQueue={onQueue} onSubmit={onSubmit} />
+    )
+
+    const editor = getByTestId('editor')
+
+    await act(async () => {
+      editor.textContent = ''
+      fireEvent.keyDown(editor, { key: 'Enter' })
+    })
+
+    expect(onQueue).not.toHaveBeenCalled()
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(onDrain).not.toHaveBeenCalled()
   })
 })
