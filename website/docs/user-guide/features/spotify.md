@@ -1,6 +1,6 @@
 # Spotify
 
-Hermes can control Spotify directly — playback, queue, search, playlists, saved tracks/albums, and listening history — using Spotify's official Web API with PKCE OAuth. Tokens are stored in `~/.hermes/auth.json` and refreshed automatically on 401; you only log in once per machine.
+Hermes can control Spotify directly — playback, queue, search, playlists, saved tracks/albums, and listening history — using Spotify's official Web API with PKCE OAuth. Tokens are stored in `~/.hermes/auth.json` and refreshed automatically on 401; you only log in once per machine (refresh tokens expire after ~6 months; re-run `hermes auth spotify` when they do).
 
 Unlike Hermes' built-in OAuth integrations (Google, GitHub Copilot, Codex), Spotify requires every user to register their own lightweight developer app. Spotify does not let third parties ship a public OAuth app that anyone can use. It takes about two minutes and `hermes auth spotify` walks you through it.
 
@@ -12,19 +12,37 @@ Unlike Hermes' built-in OAuth integrations (Google, GitHub Copilot, Codex), Spot
 
 ## Setup
 
-### 1. Enable the toolset
+### One-shot: `hermes tools` or first-run setup
+
+The fastest path. Run:
 
 ```bash
 hermes tools
 ```
 
-Scroll to `🎵 Spotify`, press space to toggle it on, then `s` to save. The 9 Spotify tools only appear in the agent's toolset after this — they're off by default so users who don't want them don't ship extra tool schemas on every API call.
+Scroll to `🎵 Spotify`, press space to toggle it on, then `s` to save. The same toggle is also available during the first-run `hermes setup` / `hermes setup tools` flow. Spotify stays opt-in, so enabling it there runs the same provider-aware configuration as `hermes tools`.
 
-### 2. Run the login wizard
+Hermes drops you straight into the OAuth flow — if you don't have a Spotify app yet, it walks you through creating one inline. Once you finish, the toolset is enabled AND authenticated in one pass.
+
+If you prefer to do the steps separately (or you're re-authing later), use the two-step flow below.
+
+### Two-step flow
+
+#### 1. Enable the toolset
+
+```bash
+hermes tools
+```
+
+Toggle `🎵 Spotify` on, save, and when the inline wizard opens, dismiss it (Ctrl+C). The toolset stays on; only the auth step is deferred.
+
+#### 2. Run the login wizard
 
 ```bash
 hermes auth spotify
 ```
+
+The 7 Spotify tools only appear in the agent's toolset after step 1 — they're off by default so users who don't want them don't ship extra tool schemas on every API call.
 
 If no `HERMES_SPOTIFY_CLIENT_ID` is set, Hermes walks you through the app registration inline:
 
@@ -52,7 +70,13 @@ Agree to the terms and click **Save**. On the next page click **Settings** → c
 
 ### Running over SSH / in a headless environment
 
-If `SSH_CLIENT` or `SSH_TTY` is set, Hermes skips the automatic browser open during both the wizard and the OAuth step. Copy the dashboard URL and the authorization URL Hermes prints, open them in a browser on your local machine, and proceed normally — the local HTTP listener still runs on the remote host on port 43827. If you need to reach it through an SSH tunnel, forward that port: `ssh -L 43827:127.0.0.1:43827 remote`.
+If `SSH_CLIENT` or `SSH_TTY` is set, Hermes skips the automatic browser open during both the wizard and the OAuth step. Copy the dashboard URL and the authorization URL Hermes prints, open them in a browser on your local machine, and proceed normally — the local HTTP listener still runs on the remote host on port `43827`. Your laptop's browser can't reach the remote loopback without an SSH local-forward:
+
+```bash
+ssh -N -L 43827:127.0.0.1:43827 user@remote-host
+```
+
+For jump-box / bastion setups and other gotchas (mosh, tmux, port conflicts), see [OAuth over SSH / Remote Hosts](../../guides/oauth-over-ssh.md).
 
 ## Verify
 
@@ -103,6 +127,12 @@ Control and inspect playback, plus fetch recently played history.
 | `list` | Every Spotify Connect device visible to your account |
 | `transfer` | Move playback to `device_id`. Optional `play: true` starts playback on transfer |
 
+### Home Assistant-managed speakers
+
+If Home Assistant manages speakers that already support Spotify Connect (for example Sonos, Echo, Nest, or other Connect-capable speakers), they appear in `spotify_devices list` automatically whenever Spotify can see them. Hermes does not need a Home Assistant ↔ Spotify bridge for this path — Spotify handles the device routing natively.
+
+Ask Hermes to transfer playback by the speaker's display name (for example, “transfer Spotify to the kitchen speaker”), or call `spotify_devices list` and pass the exact `device_id` to `spotify_devices transfer` when scripting. If the speaker is missing, open the Spotify app or the speaker's Spotify integration once so Spotify registers it as an active Connect target.
+
 #### `spotify_queue`
 | Action | Purpose | Premium? |
 |--------|---------|----------|
@@ -152,6 +182,42 @@ Read-only tools work on Free accounts. Anything that mutates playback or the que
 | `spotify_playlists` (all) | |
 | `spotify_albums` (all) | |
 | `spotify_library` (all) | |
+
+## Scheduling: Spotify + cron
+
+Because Spotify tools are regular Hermes tools, a cron job running in a Hermes session can trigger playback on any schedule. No new code needed.
+
+### Morning wake-up playlist
+
+```bash
+hermes cron add \
+  --name "morning-commute" \
+  "0 7 * * 1-5" \
+  "Transfer playback to my kitchen speaker and start my 'Morning Commute' playlist. Volume to 40. Shuffle on."
+```
+
+What happens at 7am every weekday:
+1. Cron spins up a headless Hermes session.
+2. Agent reads the prompt, calls `spotify_devices list` to find "kitchen speaker" by name, then `spotify_devices transfer` → `spotify_playback set_volume` → `spotify_playback set_shuffle` → `spotify_search` + `spotify_playback play`.
+3. Music starts on the target speaker. Total cost: one session, a few tool calls, no human input.
+
+### Wind-down at night
+
+```bash
+hermes cron add \
+  --name "wind-down" \
+  "30 22 * * *" \
+  "Pause Spotify. Then set volume to 20 so it's quiet when I start it again tomorrow."
+```
+
+### Gotchas
+
+- **An active device must exist when the cron fires.** If no Spotify client is running (phone/desktop/Connect speaker), playback actions return `403 no active device`. For morning playlists, the trick is to target a device that's always on (Sonos, Echo, a smart speaker) rather than your phone.
+- **Premium required for anything that mutates playback** — play, pause, skip, volume, transfer. Read-only cron jobs (scheduled "email me my recently played tracks") work fine on Free.
+- **The cron agent inherits your active toolsets.** Spotify must be enabled in `hermes tools` for the cron session to see the Spotify tools.
+- **Cron jobs run with `skip_memory=True`** so they don't write to your memory store.
+
+Full cron reference: [Cron Jobs](./cron).
 
 ## Sign out
 
