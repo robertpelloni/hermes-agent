@@ -1,0 +1,217 @@
+import { TERMUX_TUI_MODE } from '../config/env.js'
+import type { Msg } from '../types.js'
+
+import { transcriptBodyWidth } from './inputMetrics.js'
+import { hasAnsi, stripAnsi } from './text.js'
+
+const hashText = (text: string) => {
+  let h = 5381
+
+  for (let i = 0; i < text.length; i++) {
+    h = ((h << 5) + h) ^ text.charCodeAt(i)
+  }
+
+  return (h >>> 0).toString(36)
+}
+
+export const messageHeightKey = (msg: Msg) => {
+  const todoSig = msg.todos?.map(t => `${t.status}:${t.content}`).join('\u0001') ?? ''
+
+  const panelSig =
+    msg.panelData?.sections
+      .map(s => `${s.title ?? ''}:${s.text?.length ?? 0}:${s.items?.length ?? 0}:${s.rows?.length ?? 0}`)
+      .join('\u0001') ?? ''
+
+  const introSig = msg.kind === 'intro' ? (msg.info?.version ?? '') : ''
+
+  return [
+    msg.role,
+    msg.kind ?? '',
+    hashText([msg.text, msg.thinking ?? '', msg.tools?.join('\n') ?? '', todoSig, panelSig, introSig].join('\0'))
+  ].join(':')
+}
+
+// Hard cap on rows the estimator will count. Each row above this is
+// invisible to the estimator (gets clipped to MAX_ESTIMATE_LINES), but
+// post-mount Yoga measurement converges to the real height on first
+// render. Without this, a long assistant turn (10k+ chars) costs O(text)
+// per offset rebuild × every uncached item — cold-mounting a 1000-row
+// transcript becomes a multi-million-char wrap walk that blocks the UI.
+//
+// 800 covers any realistic assistant message (the prior history-clip
+// ceiling was 16 lines, then full text — this is the sane middle).
+const MAX_ESTIMATE_LINES = 800
+
+export const wrappedLines = (text: string, width: number, maxLines: number = MAX_ESTIMATE_LINES) => {
+  const w = Math.max(1, width)
+  // Worst case: every cell is its own row at width=1, plus a small
+  // slack for the trailing partial line. Walking past this byte budget
+  // cannot increase n any further once n is already past maxLines, so
+  // bail. Saves O(text) walks on multi-megabyte single-line messages.
+  const budget = Math.min(text.length, maxLines * w + maxLines)
+  let n = 0
+  let start = 0
+
+  for (let i = 0; i <= budget; i++) {
+    if (i === text.length || i === budget || text.charCodeAt(i) === 10) {
+      const rows = Math.max(1, Math.ceil((i - start) / w))
+      n += rows >= maxLines - n ? maxLines - n : rows
+      start = i + 1
+
+      if (n >= maxLines) {
+        return maxLines
+      }
+    }
+  }
+
+  return n
+}
+
+// Strip ANSI from only as much of the raw text as wrappedLines could possibly
+// need to saturate its row cap, so a multi-megabyte ANSI-heavy message doesn't
+// re-introduce the O(text) cost the wrappedLines byte-budget exists to avoid.
+//
+// wrappedLines stops counting once it reaches `maxLines` rows; the most
+// VISIBLE characters it can consume before that is `maxLines * width + maxLines`
+// (one cell per column per row, plus a per-line slack). ANSI escape sequences
+// add non-visible bytes interspersed with that visible content, so we slice a
+// multiple of the visible budget before stripping — the ANSI_OVERHEAD factor is
+// the assumed worst-case ratio of total bytes to visible bytes. The densest
+// realistic SGR (per-word truecolor `\x1b[38;2;r;g;bm…\x1b[39m`, ~20 bytes
+// wrapping a short token) measures ~5.5× overhead; 8× leaves headroom so the
+// bounded estimate still reaches the row cap on such input. Even if a
+// pathological message exceeds it, the only consequence is the estimate
+// clipping below the true height past row 800 — already the documented
+// MAX_ESTIMATE_LINES behavior, and post-mount Yoga measurement converges
+// anyway. Slicing BEFORE stripping is safe because stripAnsi only removes
+// characters, so the stripped slice still contains at least as many visible
+// chars as wrappedLines needs.
+const ANSI_OVERHEAD = 8
+
+const strippedForEstimate = (raw: string, width: number) => {
+  if (!hasAnsi(raw)) {
+    return raw
+  }
+
+  const w = Math.max(1, width)
+  const visibleBudget = MAX_ESTIMATE_LINES * w + MAX_ESTIMATE_LINES
+  const sliceBudget = visibleBudget * ANSI_OVERHEAD
+
+  return stripAnsi(raw.length > sliceBudget ? raw.slice(0, sliceBudget) : raw)
+}
+
+export const estimatedMsgHeight = (
+  msg: Msg,
+  cols: number,
+  {
+    compact,
+    details,
+    leadGap = false,
+    thinkingVisible = details,
+    toolsVisible = details,
+    userPrompt = '',
+    withSeparator = false
+  }: {
+    compact: boolean
+    details: boolean
+    leadGap?: boolean
+    thinkingVisible?: boolean
+    toolsVisible?: boolean
+    userPrompt?: string
+    withSeparator?: boolean
+  }
+) => {
+  if (msg.kind === 'intro') {
+    return msg.info?.version ? 9 : 5
+  }
+
+  if (msg.kind === 'panel') {
+    return Math.max(3, (msg.panelData?.sections.length ?? 1) * 2 + 1)
+  }
+
+  if (msg.kind === 'trail' && msg.todos?.length) {
+    if (msg.todoCollapsedByDefault) {
+      return 2
+    }
+
+    return Math.max(2, msg.todos.length + 2)
+  }
+
+  const bodyWidth = transcriptBodyWidth(cols, msg.role, userPrompt, TERMUX_TUI_MODE)
+  // Parity with MessageLine: any message carrying ANSI is rendered through
+  // <Ansi>/sanitizeAnsiForRender (role !== 'user') or laid out by the
+  // terminal on its VISIBLE width — the escape bytes never occupy columns.
+  // Measuring the raw string makes wrappedLines count escape bytes as
+  // width, inflating the estimate ~3-6x for SGR-heavy history (cli-highlight
+  // tool output, Rich markup). On long resumed sessions that drift desyncs
+  // the virtual list's offsets from the post-mount Yoga heights, which
+  // shows up as blank gaps and — once the wrong rows mount into the
+  // viewport — overlapping/jumbled text. Strip first so the estimate
+  // tracks what actually renders. (/compress masks the bug by replacing
+  // ANSI-laden history with clean summary text.) strippedForEstimate bounds
+  // the strip to the wrap budget so huge ANSI messages stay O(budget), not
+  // O(text) — see its comment.
+  const text = strippedForEstimate(msg.text, bodyWidth)
+  let h = wrappedLines(text || ' ', bodyWidth)
+
+  if (!compact && msg.role === 'assistant' && !hasAnsi(msg.text)) {
+    // Paragraph gaps add up to 6 extra rows of breathing room — but ONLY
+    // when the message renders through <Md> (markdown), which inserts blank
+    // rows between blocks. ANSI-bearing assistant messages render through
+    // <Ansi> instead (see messageLine.tsx role!=='user' && hasAnsi branch),
+    // which emits the text's own newlines 1:1 with no extra breathing room.
+    // wrappedLines already counted those literal blank lines, so adding the
+    // gap bonus here double-counts and overshoots ~6 rows on colored code
+    // echoes — re-introducing virtual-list drift on resumed sessions full
+    // of highlighted tool output. Gate the bonus on !hasAnsi to match what
+    // actually renders.
+    //
+    // Slice first so the regex never walks more than the first ~16k chars of
+    // a giant assistant message — post-mount Yoga measurement converges to
+    // the real height regardless of how the estimate undercounts.
+    const scan = text.length > 16_000 ? text.slice(0, 16_000) : text
+    h += Math.min(6, (scan.match(/\n\s*\n/g) ?? []).length)
+  }
+
+  if (details) {
+    const hasVisibleTools = toolsVisible && Boolean(msg.tools?.length)
+    const hasVisibleThinking = thinkingVisible && /\S/.test(msg.thinking ?? '')
+    const hasVisibleDetails = hasVisibleTools || hasVisibleThinking
+
+    if (hasVisibleDetails) {
+      h +=
+        (hasVisibleTools ? (msg.tools?.length ?? 0) : 0) +
+        (hasVisibleThinking ? wrappedLines(msg.thinking ?? '', bodyWidth) : 0)
+
+      if (msg.role === 'assistant' && /\S/.test(msg.text)) {
+        h += 2
+      }
+    }
+  }
+
+  if (msg.role === 'user' || msg.kind === 'diff') {
+    // Top + bottom blank line.
+    h += 2
+  } else if (msg.kind === 'slash') {
+    h++
+  }
+
+  // Group-boundary blank line owned by BlockSlot: model prose, reasoning/tool
+  // trails, and notes/errors each start a new visual group when the block
+  // above them is a different kind. The caller resolves the boundary against
+  // the previous row (see domain/blockLayout.ts::hasLeadGap) and passes the
+  // result here so the estimate matches the rendered marginTop before Yoga
+  // remeasures. user / diff / slash never set this — they own their margins.
+  if (leadGap) {
+    h++
+  }
+
+  // Inter-turn separator above non-first user messages (1 rule row + 1
+  // top-margin row). The render-side gate is in appLayout.tsx; we trust
+  // the caller to pass `withSeparator` only when it matches that gate.
+  if (withSeparator) {
+    h += 2
+  }
+
+  return Math.max(1, h)
+}
