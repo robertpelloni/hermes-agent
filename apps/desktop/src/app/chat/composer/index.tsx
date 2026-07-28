@@ -1,12 +1,6 @@
 import { ComposerPrimitive } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
-import {
-  type ClipboardEvent,
-  type FormEvent,
-  type KeyboardEvent,
-  useEffect,
-  useRef
-} from 'react'
+import { type ClipboardEvent, type FormEvent, type KeyboardEvent, useEffect, useRef } from 'react'
 
 import { composerFill, composerSurfaceGlass } from '@/components/chat/composer-dock'
 import { Button } from '@/components/ui/button'
@@ -27,11 +21,7 @@ import { $autoSpeakReplies } from '@/store/voice-prefs'
 import { useTheme } from '@/themes'
 
 import { AttachmentList } from './attachments'
-import {
-  COMPOSER_FADE_BACKGROUND,
-  type QueueEditState,
-  slashArgStage
-} from './composer-utils'
+import { COMPOSER_FADE_BACKGROUND, type QueueEditState, slashArgStage } from './composer-utils'
 import { ContextMenu } from './context-menu'
 import { ComposerControls } from './controls'
 import { COMPOSER_DROP_ACTIVE_CLASS, COMPOSER_DROP_FADE_CLASS } from './drop-affordance'
@@ -138,6 +128,7 @@ export function ChatBar({
 
   const { t } = useI18n()
   const gatewayState = useStore($gatewayState)
+  const gatewayConnected = gatewayState === 'open'
   const reconnecting = gatewayState === 'closed' || gatewayState === 'error'
   const inputDisabled = disabled && !reconnecting
 
@@ -188,6 +179,7 @@ export function ChatBar({
     clearDraft,
     draftRef,
     focusInput,
+    gatewayConnected,
     loadIntoComposer,
     onCancel,
     onSubmit,
@@ -577,7 +569,14 @@ export function ChatBar({
       const editorText = editorRef.current ? composerPlainText(editorRef.current) : draftRef.current
       const hasLivePayload = editorText.trim().length > 0 || attachments.length > 0
 
+      // Gateway down (a post-boot reconnect keeps the composer editable): don't
+      // silently swallow the Enter. Route a real draft into submitDraft, which
+      // queues it so the auto-drain flushes it the instant the socket reopens.
       if (disabled) {
+        if (hasLivePayload) {
+          submitDraft()
+        }
+
         return
       }
 

@@ -47,10 +47,14 @@ class GatewayAuthorizationMixin:
         if not platform:
             return None
         profile_name = (profile or "").strip() or None
-        if profile_name:
+        if profile_name and profile_name != "default":
             profile_adapters = getattr(self, "_profile_adapters", None) or {}
             if profile_name in profile_adapters:
                 return profile_adapters[profile_name].get(platform)
+            # Fail closed: a stamped secondary profile with no registry entry
+            # (e.g. its adapter failed to connect) must NOT fall back to the
+            # default profile's adapter — that sends replies out the wrong bot.
+            return None
         adapters = getattr(self, "adapters", None) or {}
         return adapters.get(platform)
 
@@ -242,6 +246,21 @@ class GatewayAuthorizationMixin:
             return any(str(item).strip() for item in sender_allow)
         return False
 
+    def _pairing_store_for(self, source: "SessionSource"):
+        """Pick the per-profile PairingStore for a source, falling back to global.
+
+        In a multiplexing gateway, each profile owns its own pairing whitelist
+        so isolation is preserved. When the source has no profile (single-
+        profile gateway, or a path that hasn't stamped profile yet) or the
+        profile isn't registered, fall back to ``self.pairing_store`` (the
+        global default) so existing behavior is preserved.
+        """
+        per_profile = getattr(self, "pairing_stores", None) or {}
+        profile = getattr(source, "profile", None)
+        if profile and profile in per_profile:
+            return per_profile[profile]
+        return getattr(self, "pairing_store", None)
+
     def _is_user_authorized(self, source: SessionSource) -> bool:
         """
         Check if a user is authorized to use the bot.
@@ -417,17 +436,24 @@ class GatewayAuthorizationMixin:
         if getattr(source, "role_authorized", False) is True:
             return True
 
-        # Pairing store membership. Recorded here but NOT returned yet: if an
-        # allowlist is configured, a previously-paired user must STILL be in
-        # that allowlist to be honored. Otherwise a user who tapped "Always" on
-        # an approval button could permanently bypass TELEGRAM_ALLOWED_USERS (or
-        # equivalent) via the pairing store even after being removed from the
-        # allowlist (issue #23778). When no allowlist is configured, pairing is
-        # the intended access path and is honored in the no-allowlist branch
-        # below; when an allowlist IS configured, the pairing entry only counts
-        # if the user is also in it (folded into the final membership check).
+        # Check pairing store. A pairing entry is a first-class authorization
+        # grant, created only by a trusted operator approving a pairing code
+        # (hermes gateway pairing approve / the authenticated dashboard) — an
+        # inbound sender can never reach approve_code, so this is not an
+        # attacker-controlled path. Honored as a UNION with the allowlist: a
+        # paired user is authorized regardless of the allowlist, and when an
+        # allowlist IS configured, operator approval also writes the user into
+        # that allowlist (see PairingStore._approve_user), keeping a single
+        # operator-visible source of truth. (#23778: the original bypass was the
+        # inbound message/approval-button gate, not this gate; that gate is
+        # fixed separately.)
+        # In multiplex gateways, route to the per-profile PairingStore so each
+        # profile's whitelist is isolated; falls back to the global store when
+        # the source has no profile or the profile isn't registered.
         platform_name = source.platform.value if source.platform else ""
-        is_paired = self.pairing_store.is_approved(platform_name, user_id)
+        pairing_store = self._pairing_store_for(source)
+        if pairing_store is not None and pairing_store.is_approved(platform_name, user_id):
+            return True
 
         # Check platform-specific and global allowlists
         platform_allowlist = os.getenv(platform_env_map.get(source.platform, ""), "").strip()
@@ -439,11 +465,6 @@ class GatewayAuthorizationMixin:
         global_allowlist = os.getenv("GATEWAY_ALLOWED_USERS", "").strip()
 
         if not platform_allowlist and not group_user_allowlist and not group_chat_allowlist and not global_allowlist:
-            # No env allowlist configured. A pairing-store entry is the intended
-            # access path here (the user completed the pairing handshake), so
-            # honor it — there is no allowlist to re-validate against.
-            if is_paired:
-                return True
             # No env allowlist configured. Adapters that own their own
             # config-driven access policy (dm_policy / group_policy /
             # allow_from / group_allow_from) gate access at intake, so for those

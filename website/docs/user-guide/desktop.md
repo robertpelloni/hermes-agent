@@ -61,6 +61,7 @@ The model picker lives in the **composer**, just left of the microphone. Click i
 - **The composer picker is sticky UI state and never touches your default.** It's remembered locally (per device) and **follows** across new chats and restarts instead of snapping back to the default — pick a model once and the next `Cmd/Ctrl+N` opens on it. With a live chat, switching models scopes the change to that **current chat**; either way the selection rides along when the session is created/switched and is **never** written to the profile default. (Switching [profiles](#sessions--profiles) reseeds to that profile's own default.)
 - **Set the default in Settings → Model.** That "main" model is your **per-profile global default** — it's what new chats, crons, subagents, and auxiliary tasks start from, and it's the only place that writes it. Each [profile](#sessions--profiles) keeps its own default.
 - **Per-model effort/fast presets.** Each model remembers its own reasoning effort and fast-mode choice in the desktop app, re-applied to the session whenever you pick that model. These presets are a desktop convenience and don't change crons or subagents.
+- **Mid-chat switches reset the prompt cache.** Switching the model inside a live chat means the next message re-reads the whole conversation at full input price (provider prompt caches are keyed to the model). Fine occasionally; on a long chat, a fresh chat on the new model is often cheaper than bouncing back and forth.
 
 ### File browser
 
@@ -220,6 +221,24 @@ The remote gateway host is configured per [profile](./profiles.md), so each prof
 For the same setup from the web-dashboard angle, see [Web Dashboard → Connecting Hermes Desktop to a remote backend](./features/web-dashboard.md#connecting-hermes-desktop-to-a-remote-backend); the env vars are catalogued under [Environment Variables → Web Dashboard & Hermes Desktop](../reference/environment-variables.md#web-dashboard--hermes-desktop).
 
 ## Troubleshooting
+
+### macOS won't open the app / asks about the "developer"
+
+You do **not** need an Apple Developer account, an Apple Developer Program membership, or any "developer password" to install or run Hermes Desktop. The official builds from [our download page](https://hermes-agent.nousresearch.com/desktop) are code-signed and notarized by Apple, so a normal install just works.
+
+If macOS still shows a dialog like *"Hermes can't be opened because Apple cannot check it for malicious software"* or *"…from an unidentified developer"*, that's **Gatekeeper**, not an account requirement. It usually means the download's quarantine attribute is in an odd state, or you built the app locally with `hermes desktop` (which produces an unsigned build from your own source). It is asking you to confirm you trust the app — there is no developer account or password involved.
+
+To open it anyway:
+
+1. **Right-click (or Control-click) the app** in Finder and choose **Open**, then click **Open** in the dialog. macOS remembers this choice, so you only do it once.
+2. If there's no **Open** option, go to **System Settings → Privacy & Security**, scroll to the **Security** section, and click **Open Anyway** next to the Hermes entry. (The macOS *login* password it may ask for here is your own Mac password to change a security setting — not a "developer" password.)
+
+If you'd rather not deal with Gatekeeper at all, the CLI install needs no signing prompts:
+
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+hermes desktop   # launches the desktop app, building it locally
+```
 
 Boot logs land in `HERMES_HOME/logs/desktop.log` (it includes backend output and recent Python tracebacks) — check it first if the app reports a boot failure. You can also tail it from the CLI:
 
