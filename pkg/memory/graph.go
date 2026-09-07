@@ -15,7 +15,7 @@ type Node struct {
 }
 
 // GraphStore provides CRUD operations on a simple directed graph stored in SQLite.
-// It reuses the same SQLite file as the memory store (memory.db).
+// It reuses the same SQLite file as the memory store (sessions.db).
 type GraphStore struct {
     db *sql.DB
 }
@@ -24,7 +24,7 @@ type GraphStore struct {
 // required tables exist. It returns nil on failure.
 func NewGraphStore() *GraphStore {
     // Reuse initSQLite from memory package to get the SQLite DB handle.
-    // initSQLite creates the DB file under $HOME/.hermes/memory.db.
+    // initSQLite creates the DB file under $HOME/.hermes/sessions.db.
     sqlite := initSQLite()
     if sqlite == nil {
         return nil

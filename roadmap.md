@@ -10,11 +10,11 @@
 - [x] initializes go subsystems (stubs)
 
 ## phase 2: go subsystem expansion (next)
-- [ ] agent loop: implement full conversation handling in go
-- [ ] memory store: persistent sqlite or file-based memory
-- [ ] skill loader: discover and load .py skills from skills/
-- [ ] gateway: implement telegram/discord cli platforms
-- [ ] mcp server: full model context protocol implementation
+- [x] agent loop: implement full conversation handling in go
+- [x] memory store: persistent sqlite or file-based memory
+- [x] skill loader: discover and load .py skills from skills/
+- [x] gateway: implement telegram/discord cli platforms
+- [x] mcp server: full model context protocol implementation
 - [ ] scheduler: cron-like job execution
 
 ## phase 3: hybrid operation
