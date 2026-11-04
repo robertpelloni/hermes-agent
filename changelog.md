@@ -1,5 +1,21 @@
 # changelog
 
+## 1.0.0-build.3 (2026-11-04)
+
+### added
+- system tray icon and server management (`apps/desktop/electron/tray.ts`) with quick status indicators, main window toggling, external dashboard launcher, docs shortcuts, backend restart, and safe graceful server shutdown.
+- vitest unit test suite for electron system tray actions (`apps/desktop/electron/tray.test.ts`).
+- consolidated command center & overview page (`web/src/pages/OverviewPage.tsx`) unifying live telemetry, active model stats, persistent session counters, scheduled automations, quick workflows, and platform health.
+- unit test coverage for the overview command center (`web/src/pages/OverviewPage.test.tsx`).
+- unified multi-harness build & check script (`scripts/build_all.sh`).
+- non-destructive archive mechanism for legacy scripts under `scripts/archive/`.
+
+### changed
+- redesigned dashboard sidebar navigation in `web/src/App.tsx` into four prioritized functional sections: Workspace, Capabilities & Intelligence, Automations & Connectors, and Operations & System.
+- added informative hover tooltips across collapsed and expanded nav items to explain feature roles.
+- updated `start.bat` with `build-all` and `web` targets.
+- recompiled production web bundle into `hermes_cli/web_dist/`.
+
 ## 1.0.0-build.2 (2026-06-14)
 
 ### added
