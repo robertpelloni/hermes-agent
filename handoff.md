@@ -1,4 +1,4 @@
-# handoff — session 2026-11-04 (1.0.0-build.3)
+# handoff — session 2026-11-04 (1.0.0-build.4)
 
 ## session summary
 Implemented native Electron system tray icon with full background server controls (open main window, open web dashboard, restart backend child process, and quit Hermes & terminate all servers). Redesigned dashboard UI layout with a consolidated Command Center overview page (`/overview`), structured sidebar categories (Workspace, Capabilities, Automations, Operations), and rich tooltips. Reorganized build and launch automation with `scripts/build_all.sh` and updated `start.bat`.
@@ -28,8 +28,12 @@ Implemented native Electron system tray icon with full background server control
 - Enhanced `start.bat` with `build-all`, `web`, and multi-harness commands.
 
 ### 4. Documentation Governance
-- Bumped `version.md` to `1.0.0-build.3`.
+- Bumped `version.md` to `1.0.0-build.4`.
 - Updated `changelog.md`, `roadmap.md`, `todo.md`, and `handoff.md`.
+
+### 5. Persistent SQLite Store Expansion (`pkg/memory`)
+- Implemented `ListSessions()`, `CountMessages()`, and `DeleteSession()` on `Store` and `sqliteDB`.
+- Added unit tests in `pkg/memory/sqlite_store_test.go`.
 
 ## verification & test status
 - Go test suite: `go test ./...` passed.

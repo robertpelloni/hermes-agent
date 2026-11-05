@@ -90,6 +90,30 @@ func (s *sqliteDB) deleteSession(sessionID string) error {
 	return err
 }
 
+func (s *sqliteDB) listSessions() ([]string, error) {
+	rows, err := s.db.Query(`SELECT DISTINCT session_id FROM messages ORDER BY session_id ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var sessions []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, id)
+	}
+	return sessions, nil
+}
+
+func (s *sqliteDB) countMessages(sessionID string) (int, error) {
+	var count int
+	err := s.db.QueryRow(`SELECT COUNT(*) FROM messages WHERE session_id = ?`, sessionID).Scan(&count)
+	return count, err
+}
+
 func (s *sqliteDB) close() error {
 	return s.db.Close()
 }

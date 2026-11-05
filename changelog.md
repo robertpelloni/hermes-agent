@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.4 (2026-11-04)
+
+### added
+- persistent session query and lifecycle methods in Go memory package (`pkg/memory/sqlite_store.go` and `pkg/memory/memory.go`): `ListSessions()`, `CountMessages()`, and `DeleteSession()`.
+- unit test suite `pkg/memory/sqlite_store_test.go` verifying SQLite schema creation, message inserts, counting, session enumeration, and session deletion.
+
 ## 1.0.0-build.3 (2026-11-04)
 
 ### added
