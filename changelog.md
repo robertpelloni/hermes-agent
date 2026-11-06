@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.8 (2026-11-05)
+
+### added
+- updated `deploy.md` with instructions for `scripts/build_all.sh` and multi-harness commands.
+- updated `memory.md` recording architecture of Go subsystems (SQLite memory, skill loader, scheduler) and Electron desktop system tray.
+
 ## 1.0.0-build.7 (2026-11-05)
 
 ### added

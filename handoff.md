@@ -1,4 +1,4 @@
-# handoff — session 2026-11-05 (1.0.0-build.7)
+# handoff — session 2026-11-05 (1.0.0-build.8)
 
 ## session summary
 Implemented native Electron system tray icon with full background server controls (open main window, open web dashboard, restart backend child process, and quit Hermes & terminate all servers). Redesigned dashboard UI layout with a consolidated Command Center overview page (`/overview`), structured sidebar categories (Workspace, Capabilities, Automations, Operations), and rich tooltips. Reorganized build and launch automation with `scripts/build_all.sh` and updated `start.bat`.
@@ -44,6 +44,9 @@ Implemented native Electron system tray icon with full background server control
 
 ### 8. Go Subsystems Initialization (`cmd/hermes/main.go`)
 - Wired `skill.Repository` and `scheduler.Scheduler` into `cmd/hermes/main.go` startup and shutdown lifecycle.
+
+### 9. Deployment & Architecture Documentation
+- Updated `deploy.md` with multi-harness build directions and `memory.md` with subsystem architectural details.
 
 ## verification & test status
 - Go test suite: `go test ./...` passed.
