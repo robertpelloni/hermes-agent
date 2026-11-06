@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.5 (2026-11-05)
+
+### added
+- automated skill loader and directory crawler in Go (`pkg/skill/skill.go`): `LoadFromDir()`, supporting YAML frontmatter extraction from `SKILL.md` and module docstring parsing from `.py` files.
+- unit test suite `pkg/skill/skill_test.go` verifying discovery, metadata extraction, and repository registration.
+
 ## 1.0.0-build.4 (2026-11-04)
 
 ### added

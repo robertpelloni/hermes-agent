@@ -13,7 +13,7 @@
 - [ ] test foundation mode: START.BAT foundation
 - [ ] expand agent loop (pkg/agent/agent.go) with streaming response handling
 - [x] implement memory store with sqlite persistence (pkg/memory/memory.go)
-- [ ] add basic skill loader that discovers .py files in skills/
+- [x] add basic skill loader that discovers .py files in skills/
 - [ ] run go test ./pkg/... ./cmd/...
 
 ## medium-term
