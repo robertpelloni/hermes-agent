@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.7 (2026-11-05)
+
+### added
+- connected Go skill discovery (`pkg/skill.LoadFromDir`) and task scheduler (`pkg/scheduler.New`) into the Go desktop initialization lifecycle in `cmd/hermes/main.go` with graceful shutdown handling.
+
 ## 1.0.0-build.6 (2026-11-05)
 
 ### added

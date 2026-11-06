@@ -25,6 +25,8 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/orchestration"
 	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
+	"github.com/robertpelloni/hermes-agent/pkg/scheduler"
+	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
 func findPython() (string, error) {
@@ -286,6 +288,14 @@ func main() {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
 	}
 
+	skillRepo := skill.NewRepository()
+	if n, err := skillRepo.LoadFromDir(filepath.Join(root, "skills")); err == nil {
+		fmt.Printf("  skills loaded: %d\n", n)
+	}
+
+	sched := scheduler.New()
+	sched.Start(ctx)
+
 	ag := agent.New(agent.DefaultConfig())
 
 	// Start MCP server in background
@@ -315,6 +325,7 @@ func main() {
 	fmt.Println()
 	fmt.Println("shutting down...")
 	cancel()
+	sched.Stop()
 	memStore.Close()
 	gw.Stop()
 	fmt.Println("done.")
