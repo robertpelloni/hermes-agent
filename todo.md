@@ -18,7 +18,7 @@
 
 ## medium-term
 - [ ] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
-- [ ] implement mcp server with basic tool registration (pkg/mcp/mcp.go)
+- [x] implement mcp server with basic tool registration and testing (pkg/mcp/mcp.go)
 - [ ] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go)
 - [ ] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
 - [ ] integrate pi-ai multi-provider API from pi-mono

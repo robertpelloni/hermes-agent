@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.6 (2026-11-05)
+
+### added
+- automated unit test coverage for Model Context Protocol (MCP) server (`pkg/mcp/mcp_test.go`) covering JSON-RPC tool listing, dynamic invocation, and result serialization.
+
 ## 1.0.0-build.5 (2026-11-05)
 
 ### added

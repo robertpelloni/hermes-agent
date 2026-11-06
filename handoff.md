@@ -1,4 +1,4 @@
-# handoff — session 2026-11-05 (1.0.0-build.5)
+# handoff — session 2026-11-05 (1.0.0-build.6)
 
 ## session summary
 Implemented native Electron system tray icon with full background server controls (open main window, open web dashboard, restart backend child process, and quit Hermes & terminate all servers). Redesigned dashboard UI layout with a consolidated Command Center overview page (`/overview`), structured sidebar categories (Workspace, Capabilities, Automations, Operations), and rich tooltips. Reorganized build and launch automation with `scripts/build_all.sh` and updated `start.bat`.
@@ -38,6 +38,9 @@ Implemented native Electron system tray icon with full background server control
 ### 6. Automated Skill Discovery & Loading (`pkg/skill`)
 - Implemented recursive skill discovery `LoadFromDir()` in `pkg/skill/skill.go` parsing frontmatter in `SKILL.md` and Python docstrings.
 - Added unit tests in `pkg/skill/skill_test.go`.
+
+### 7. Model Context Protocol Server Verification (`pkg/mcp`)
+- Implemented unit tests for JSON-RPC MCP server in `pkg/mcp/mcp_test.go`.
 
 ## verification & test status
 - Go test suite: `go test ./...` passed.
