@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.12)
+# handoff — session 2026-11-05 (1.0.0-build.13)
 
 ## session summary
+Expanded Go agent loop verification: added unit tests for `HandleMessageStream` (`EventText`, `EventOutcome`, `EventDone`) and verified automatic session conversation persistence in `pkg/agent/agent_e2e_test.go`.
 Expanded Go subsystem initialization and test coverage: added comprehensive unit tests for `pkg/sessionruntime` and `pkg/modelregistry`. Wired `sessionruntime.Runtime` into `pkg/agent/agent.go` and `cmd/hermes/main.go` desktop launcher lifecycle so that conversation turns are automatically tracked per session.
 Implemented native Electron system tray icon with full background server controls (open main window, open web dashboard, restart backend child process, and quit Hermes & terminate all servers). Redesigned dashboard UI layout with a consolidated Command Center overview page (`/overview`), structured sidebar categories (Workspace, Capabilities, Automations, Operations), and rich tooltips. Reorganized build and launch automation with `scripts/build_all.sh` and updated `start.bat`.
 

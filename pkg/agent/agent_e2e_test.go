@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
+	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 )
 
 // sseEvent formats a JSON object as an SSE data: line.
@@ -282,6 +283,161 @@ func TestDefaultConfigWithInvalidTemplateFallback(t *testing.T) {
 	cfg := agent.DefaultConfig()
 	if !strings.Contains(cfg.SystemPrompt, "Hermes") {
 		t.Errorf("fallback should use default prompt, got: %s", cfg.SystemPrompt)
+	}
+}
+
+// TestAgentStreamingLoop tests HandleMessageStream with event sequence and session persistence.
+func TestAgentStreamingLoop(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+
+		// SSE chunk with text delta
+		chunk1 := map[string]any{
+			"id":      "chatcmpl-stream-1",
+			"object":  "chat.completion.chunk",
+			"created": time.Now().Unix(),
+			"model":   "test-model",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"delta": map[string]any{
+						"role":    "assistant",
+						"content": "Streaming response from Hermes.",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		fmt.Fprint(w, sseEvent(chunk1))
+		fmt.Fprint(w, sseDone())
+	}))
+	defer mockServer.Close()
+
+	cfg := agent.Config{
+		Model:         "test-model",
+		Provider:      "local-llm",
+		APIKey:        "test-key",
+		BaseURL:       mockServer.URL + "/v1",
+		MaxTokens:     1024,
+		Temperature:   0.7,
+		TopP:          0.9,
+		MaxIterations: 5,
+		SystemPrompt:  "You are Hermes.",
+		SessionTTL:    1 * time.Hour,
+	}
+
+	ag := agent.New(cfg)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	eventCh := ag.HandleMessageStream(ctx, "cli", "user1", "Hello stream")
+
+	var receivedText string
+	var sawOutcome bool
+	var sawDone bool
+
+	for event := range eventCh {
+		switch event.Type {
+		case agent.EventText:
+			receivedText += event.Text
+		case agent.EventOutcome:
+			sawOutcome = true
+			if !strings.Contains(event.Outcome, "Streaming response") {
+				t.Errorf("unexpected outcome: %s", event.Outcome)
+			}
+		case agent.EventDone:
+			sawDone = true
+		case agent.EventError:
+			t.Fatalf("unexpected stream error: %v", event.Error)
+		}
+	}
+
+	if !sawDone {
+		t.Errorf("expected EventDone event")
+	}
+	if !sawOutcome {
+		t.Errorf("expected EventOutcome event")
+	}
+	if receivedText != "Streaming response from Hermes." {
+		t.Errorf("unexpected accumulated text: %s", receivedText)
+	}
+}
+
+// TestAgentSessionPersistence tests that agent conversation turns are saved into SessionRuntime.
+func TestAgentSessionPersistence(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		chunk := map[string]any{
+			"id":      "chatcmpl-persist",
+			"object":  "chat.completion.chunk",
+			"created": time.Now().Unix(),
+			"model":   "test-model",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"delta": map[string]any{
+						"role":    "assistant",
+						"content": "I remember your conversation.",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		fmt.Fprint(w, sseEvent(chunk))
+		fmt.Fprint(w, sseDone())
+	}))
+	defer mockServer.Close()
+
+	tempDir, err := os.MkdirTemp("", "hermes-agent-sess-*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	sessRuntime := sessionruntime.NewRuntime(tempDir, true)
+
+	cfg := agent.Config{
+		Model:         "test-model",
+		Provider:      "local-llm",
+		APIKey:        "test-key",
+		BaseURL:       mockServer.URL + "/v1",
+		MaxTokens:     1024,
+		Temperature:   0.7,
+		TopP:          0.9,
+		MaxIterations: 5,
+		SystemPrompt:  "You are Hermes.",
+		SessionTTL:    1 * time.Hour,
+	}
+
+	ag := agent.New(cfg)
+	ag.SetSessionRuntime(sessRuntime)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := ag.HandleMessage(ctx, "slack", "user_123", "Hello there!")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp != "I remember your conversation." {
+		t.Errorf("unexpected response: %s", resp)
+	}
+
+	// Verify session was created and contains user + assistant messages
+	sess, ok := sessRuntime.Get("slack:user_123")
+	if !ok {
+		t.Fatalf("expected session 'slack:user_123' to be created")
+	}
+	if len(sess.Messages) != 2 {
+		t.Fatalf("expected 2 messages, got %d", len(sess.Messages))
+	}
+	if sess.Messages[0].Content[0].Text != "Hello there!" {
+		t.Errorf("expected user message 'Hello there!', got: %s", sess.Messages[0].Content[0].Text)
+	}
+	if sess.Messages[1].Content[0].Text != "I remember your conversation." {
+		t.Errorf("expected assistant message, got: %s", sess.Messages[1].Content[0].Text)
 	}
 }
 

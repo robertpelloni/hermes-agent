@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.13 (2026-11-05)
+
+### added
+- Streaming agent loop unit tests (`TestAgentStreamingLoop`) in `pkg/agent/agent_e2e_test.go` verifying delta event propagation, outcome delivery, and done events.
+- Agent session persistence verification (`TestAgentSessionPersistence`) in `pkg/agent/agent_e2e_test.go` ensuring conversation turns are recorded into `sessionruntime.Runtime`.
+
 ## 1.0.0-build.12 (2026-11-05)
 
 ### added
