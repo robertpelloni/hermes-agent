@@ -1,4 +1,4 @@
-# handoff — session 2026-11-05 (1.0.0-build.8)
+# handoff — session 2026-11-05 (1.0.0-build.9)
 
 ## session summary
 Implemented native Electron system tray icon with full background server controls (open main window, open web dashboard, restart backend child process, and quit Hermes & terminate all servers). Redesigned dashboard UI layout with a consolidated Command Center overview page (`/overview`), structured sidebar categories (Workspace, Capabilities, Automations, Operations), and rich tooltips. Reorganized build and launch automation with `scripts/build_all.sh` and updated `start.bat`.
@@ -47,6 +47,10 @@ Implemented native Electron system tray icon with full background server control
 
 ### 9. Deployment & Architecture Documentation
 - Updated `deploy.md` with multi-harness build directions and `memory.md` with subsystem architectural details.
+
+### 10. Gateway Platform Subsystem Expansion (`pkg/gateway`)
+- Added dynamic platform registration `RegisterPlatform()` and query `Platforms()` to `pkg/gateway/gateway.go`.
+- Added unit tests in `pkg/gateway/gateway_test.go`.
 
 ## verification & test status
 - Go test suite: `go test ./...` passed.

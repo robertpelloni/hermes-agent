@@ -38,6 +38,21 @@ func New(ag *agent.Agent) *Gateway {
 	}
 }
 
+// RegisterPlatform dynamically registers a communication platform.
+func (g *Gateway) RegisterPlatform(p Platform) {
+	g.platforms = append(g.platforms, p)
+	fmt.Printf("[hermes:gateway] Registered platform: %s\n", p.Name())
+}
+
+// Platforms returns the names of all registered communication platforms.
+func (g *Gateway) Platforms() []string {
+	names := make([]string, 0, len(g.platforms))
+	for _, p := range g.platforms {
+		names = append(names, p.Name())
+	}
+	return names
+}
+
 // Start launches all platform listeners.
 func (g *Gateway) Start(ctx context.Context) error {
 	for _, p := range g.platforms {

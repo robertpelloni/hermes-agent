@@ -17,7 +17,7 @@
 - [ ] run go test ./pkg/... ./cmd/...
 
 ## medium-term
-- [ ] implement gateway cli platform (pkg/gateway/gateway.go) - read from stdin, write to stdout
+- [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)
 - [x] implement mcp server with basic tool registration and testing (pkg/mcp/mcp.go)
 - [x] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go) and wire to main
 - [ ] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT

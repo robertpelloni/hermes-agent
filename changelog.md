@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.9 (2026-11-05)
+
+### added
+- dynamic platform registration (`RegisterPlatform`) and query (`Platforms`) in Go gateway subsystem (`pkg/gateway/gateway.go`).
+- unit test coverage in `pkg/gateway/gateway_test.go` verifying platform lifecycle management and startup dispatch.
+
 ## 1.0.0-build.8 (2026-11-05)
 
 ### added
