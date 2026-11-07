@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.15 (2026-11-05)
+
+### added
+- Unit test suite for `pkg/adapters` (`pkg/adapters/adapters_test.go`) covering provider route selection, cost preferences, execution plan formatting, and MCP configuration discovery.
+
 ## 1.0.0-build.14 (2026-11-05)
 
 ### added
