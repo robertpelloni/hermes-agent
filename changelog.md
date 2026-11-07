@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.10 (2026-11-05)
+
+### added
+- HTTP status and health endpoint (`StatusHandler`) on Go Gateway (`pkg/gateway/gateway.go`) to expose registered communication platforms and gateway status.
+- unit test coverage in `pkg/gateway/gateway_test.go`.
+
 ## 1.0.0-build.9 (2026-11-05)
 
 ### added

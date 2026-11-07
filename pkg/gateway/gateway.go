@@ -2,7 +2,9 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
 )
@@ -51,6 +53,15 @@ func (g *Gateway) Platforms() []string {
 		names = append(names, p.Name())
 	}
 	return names
+}
+
+// StatusHandler serves a JSON summary of registered platforms and gateway health.
+func (g *Gateway) StatusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":    "running",
+		"platforms": g.Platforms(),
+	})
 }
 
 // Start launches all platform listeners.

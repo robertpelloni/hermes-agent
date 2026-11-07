@@ -2,6 +2,9 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
@@ -55,5 +58,35 @@ func TestGatewayLifecycle(t *testing.T) {
 	gw.Stop()
 	if !mock.stopped {
 		t.Errorf("expected mock platform to be stopped")
+	}
+}
+
+func TestGatewayStatusHandler(t *testing.T) {
+	ag := agent.New(agent.DefaultConfig())
+	gw := New(ag)
+	gw.RegisterPlatform(&mockPlatform{name: "discord"})
+
+	req := httptest.NewRequest("GET", "/status", nil)
+	w := httptest.NewRecorder()
+
+	gw.StatusHandler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+
+	var resp struct {
+		Status    string   `json:"status"`
+		Platforms []string `json:"platforms"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to parse status json: %v", err)
+	}
+
+	if resp.Status != "running" {
+		t.Errorf("expected status 'running', got %s", resp.Status)
+	}
+	if len(resp.Platforms) != 2 || resp.Platforms[1] != "discord" {
+		t.Errorf("expected platforms ['cli', 'discord'], got %v", resp.Platforms)
 	}
 }
