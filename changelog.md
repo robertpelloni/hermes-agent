@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.11 (2026-11-05)
+
+### added
+- comprehensive architecture documentation specification for Go subsystems (`docs/design/go-subsystems-architecture.md`) detailing memory, skills, MCP, scheduler, and gateway layouts.
+
 ## 1.0.0-build.10 (2026-11-05)
 
 ### added
