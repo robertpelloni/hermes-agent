@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.14 (2026-11-05)
+
+### added
+- Detailed architecture specifications for `pkg/agent`, `pkg/sessionruntime`, and `pkg/modelregistry` in `docs/design/go-subsystems-architecture.md`.
+
 ## 1.0.0-build.13 (2026-11-05)
 
 ### added

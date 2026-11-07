@@ -108,6 +108,35 @@ pkg/
   - `StatusHandler(w http.ResponseWriter, r *http.Request)`
   - `Start(ctx context.Context) error` / `Stop()`
 
+### 2.6 `pkg/agent` — Conversational Agent Loop & Streaming Dispatch
+- **Execution Loop**:
+  - Automatically loads system prompt from templates (`pkg/prompttemplates`).
+  - Estimates token count and triggers context compaction (`maybeCompact`) when token limits are approached.
+  - Intercepts structured and text-based tool calls (`detectTextToolCall`), dispatches execution to `pkg/toolregistry`, and appends tool results to the conversation.
+- **Streaming Pipeline**:
+  - `HandleMessageStream` streams `StreamEvent` structures (`text`, `tool_start`, `tool_done`, `outcome`, `done`, `error`) over a Go channel.
+- **Session Persistence**:
+  - Integrates with `pkg/sessionruntime.Runtime` via `SetSessionRuntime(rt)`.
+  - Automatically records user input and assistant final responses per session.
+
+### 2.7 `pkg/sessionruntime` — Session Lifecycle & Workspace Management
+- **Persistence**: File-backed JSON session persistence stored in `~/.hermes/sessions/` (`autoSave` mode).
+- **Features**:
+  - `Create(id)` / `Get(id)` / `List()`
+  - `AppendMessage(sessionID, msg)`
+  - `Truncate(sessionID, keep)`: Reduces conversation context while preserving system prompt.
+  - `Fork(sourceID, newID, count)`: Forks an existing session starting from message *N*.
+  - `Search(query, limit)`: Substring message search across all active sessions.
+  - `Delete(id)`: Removes memory and deletes the JSON session record from disk.
+
+### 2.8 `pkg/modelregistry` — Model Capabilities & Provider Authentication
+- **Provider Resolution**:
+  - Catalogs major LLM providers (OpenAI, Anthropic, Google, Groq, xAI, Mistral, OpenRouter, Cerebras, DeepSeek, MiniMax).
+  - Resolves active API keys from environment variable fallbacks (`GetAPIKey`, `HasAPIKey`, `HasAnyAPIKey`).
+- **Model Metadata**:
+  - Catalogs model capability flags (reasoning, vision, tool use, audio).
+  - Provides model search (`SearchModels`) and tabular formatting (`FormatProviderStatus`).
+
 ---
 
 ## 3. Desktop Application Integration (`cmd/hermes/main.go`)

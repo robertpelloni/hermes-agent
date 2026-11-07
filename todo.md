@@ -10,6 +10,7 @@
 - [x] compile web distribution into `hermes_cli/web_dist/`
 - [x] add unit tests for `pkg/sessionruntime` and `pkg/modelregistry`
 - [x] connect `sessionruntime.Runtime` to `agent.Agent` and `cmd/hermes/main.go` lifecycle
+- [x] expand Go architecture specs in `docs/design/go-subsystems-architecture.md`
 
 ## near-term (next session)
 - [ ] test foundation mode: START.BAT foundation
