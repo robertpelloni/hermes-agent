@@ -11,6 +11,7 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/ai"
 	"github.com/robertpelloni/hermes-agent/pkg/aiclient"
 	"github.com/robertpelloni/hermes-agent/pkg/prompttemplates"
+	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
 
@@ -18,6 +19,7 @@ import (
 type Agent struct {
 	config   Config
 	running  bool
+	sessions *sessionruntime.Runtime
 }
 
 // Config holds agent configuration.
@@ -86,6 +88,16 @@ func New(cfg Config) *Agent {
 	return &Agent{config: cfg, running: false}
 }
 
+// SetSessionRuntime sets the session runtime store for the agent.
+func (a *Agent) SetSessionRuntime(rt *sessionruntime.Runtime) {
+	a.sessions = rt
+}
+
+// SessionRuntime returns the configured session runtime store, if any.
+func (a *Agent) SessionRuntime() *sessionruntime.Runtime {
+	return a.sessions
+}
+
 // Run starts the agent's main loop (no-op for now; the agent is driven per-message).
 func (a *Agent) Run(ctx context.Context) error {
 	fmt.Printf("[hermes] Agent ready: model=%s provider=%s baseURL=%s\n", a.config.Model, a.config.Provider, a.config.BaseURL)
@@ -101,7 +113,16 @@ func (a *Agent) SystemPrompt() string {
 // HandleMessage processes an incoming user message through the full agent loop.
 func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string) (string, error) {
 	fmt.Printf("[hermes] Message from %s/%s: %s\n", platform, userID, text)
-	return a.runConversation(ctx, text)
+	resp, err := a.runConversation(ctx, text)
+	if err == nil && a.sessions != nil {
+		sessID := fmt.Sprintf("%s:%s", platform, userID)
+		if _, ok := a.sessions.Get(sessID); !ok {
+			_, _ = a.sessions.Create(sessID)
+		}
+		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, text))
+		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, resp))
+	}
+	return resp, err
 }
 
 // HandleMessageStream processes a user message and streams events on the returned channel.

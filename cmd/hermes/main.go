@@ -26,6 +26,7 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
 	"github.com/robertpelloni/hermes-agent/pkg/scheduler"
+	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
@@ -283,6 +284,7 @@ func main() {
 	// ----- common subsystem initialization -----------------------------------
 	memStore := memory.NewStore()
 	mcpServer := mcp.NewServer("hermes-agent-go", "0.1.0")
+	sessRuntime := sessionruntime.NewRuntime("", true)
 	pluginMgr := plugin.NewManager()
 	if discovered, err := pluginMgr.Discover(); err == nil && len(discovered) > 0 {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
@@ -297,6 +299,7 @@ func main() {
 	sched.Start(ctx)
 
 	ag := agent.New(agent.DefaultConfig())
+	ag.SetSessionRuntime(sessRuntime)
 
 	// Start MCP server in background
 	go func() {

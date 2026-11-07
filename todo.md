@@ -8,6 +8,8 @@
 - [x] create unified build and test runner (`scripts/build_all.sh`)
 - [x] add non-destructive script archiving and update `start.bat`
 - [x] compile web distribution into `hermes_cli/web_dist/`
+- [x] add unit tests for `pkg/sessionruntime` and `pkg/modelregistry`
+- [x] connect `sessionruntime.Runtime` to `agent.Agent` and `cmd/hermes/main.go` lifecycle
 
 ## near-term (next session)
 - [ ] test foundation mode: START.BAT foundation

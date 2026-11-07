@@ -1,5 +1,13 @@
 # changelog
 
+## 1.0.0-build.12 (2026-11-05)
+
+### added
+- Session Runtime unit test suite (`pkg/sessionruntime/sessionruntime_test.go`) covering session lifecycle, message appending, search, forking, and context truncation.
+- Model Registry unit test suite (`pkg/modelregistry/registry_test.go`) testing provider registration, key resolution, and model lookup.
+- Integrated `sessionruntime.Runtime` into Go `Agent` (`pkg/agent/agent.go`) to automatically record conversational turns per session.
+- Subsystem initialization in `cmd/hermes/main.go` wires `sessionruntime.NewRuntime` directly to the `Agent`.
+
 ## 1.0.0-build.11 (2026-11-05)
 
 ### added
