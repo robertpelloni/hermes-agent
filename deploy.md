@@ -15,9 +15,17 @@ go build -buildvcs=false -ldflags="-s -w" -o hermes-desktop.exe ./cmd/hermes
 
 ### using start.bat
 ```cmd
-start.bat build   # build binary only
-start.bat run     # build and run
+start.bat build       # build binary only
+start.bat build-all   # build Go binary and Web UI distribution
+start.bat run         # build and run
+start.bat web         # start web dashboard
 ```
+
+### unified multi-harness build
+```bash
+./scripts/build_all.sh
+```
+This script compiles the Go desktop binary, runs Go unit tests, builds production web assets (`web/` -> `hermes_cli/web_dist/`), and typechecks the Electron desktop application.
 
 ## environment variables
 | variable | default | description |

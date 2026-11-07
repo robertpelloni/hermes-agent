@@ -69,6 +69,30 @@ func (s *Store) LoadMessages(sessionID string) ([]MessageRecord, error) {
 	return nil, nil
 }
 
+// ListSessions returns a list of distinct session IDs stored in SQLite.
+func (s *Store) ListSessions() ([]string, error) {
+	if s.sqliteDB != nil {
+		return s.sqliteDB.listSessions()
+	}
+	return nil, nil
+}
+
+// CountMessages returns the number of messages for a session in SQLite.
+func (s *Store) CountMessages(sessionID string) (int, error) {
+	if s.sqliteDB != nil {
+		return s.sqliteDB.countMessages(sessionID)
+	}
+	return 0, nil
+}
+
+// DeleteSession removes all messages for a session from SQLite.
+func (s *Store) DeleteSession(sessionID string) error {
+	if s.sqliteDB != nil {
+		return s.sqliteDB.deleteSession(sessionID)
+	}
+	return nil
+}
+
 // Close closes the SQLite backend.
 func (s *Store) Close() error {
 	if s.sqliteDB != nil {

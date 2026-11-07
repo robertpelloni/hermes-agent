@@ -25,6 +25,9 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/orchestration"
 	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
+	"github.com/robertpelloni/hermes-agent/pkg/scheduler"
+	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
+	"github.com/robertpelloni/hermes-agent/pkg/skill"
 )
 
 func findPython() (string, error) {
@@ -281,12 +284,22 @@ func main() {
 	// ----- common subsystem initialization -----------------------------------
 	memStore := memory.NewStore()
 	mcpServer := mcp.NewServer("hermes-agent-go", "0.1.0")
+	sessRuntime := sessionruntime.NewRuntime("", true)
 	pluginMgr := plugin.NewManager()
 	if discovered, err := pluginMgr.Discover(); err == nil && len(discovered) > 0 {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
 	}
 
+	skillRepo := skill.NewRepository()
+	if n, err := skillRepo.LoadFromDir(filepath.Join(root, "skills")); err == nil {
+		fmt.Printf("  skills loaded: %d\n", n)
+	}
+
+	sched := scheduler.New()
+	sched.Start(ctx)
+
 	ag := agent.New(agent.DefaultConfig())
+	ag.SetSessionRuntime(sessRuntime)
 
 	// Start MCP server in background
 	go func() {
@@ -315,6 +328,7 @@ func main() {
 	fmt.Println()
 	fmt.Println("shutting down...")
 	cancel()
+	sched.Stop()
 	memStore.Close()
 	gw.Stop()
 	fmt.Println("done.")

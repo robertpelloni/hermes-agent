@@ -33,6 +33,7 @@ import {
   Globe,
   Heart,
   KeyRound,
+  LayoutDashboard,
   Menu,
   MessageSquare,
   Package,
@@ -91,6 +92,7 @@ import ChannelsPage from "@/pages/ChannelsPage";
 import WebhooksPage from "@/pages/WebhooksPage";
 import SystemPage from "@/pages/SystemPage";
 import ChatPage from "@/pages/ChatPage";
+import OverviewPage from "@/pages/OverviewPage";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
@@ -103,7 +105,7 @@ import { api } from "@/lib/api";
 import type { StatusResponse, UpdateCheckResponse } from "@/lib/api";
 
 function RootRedirect() {
-  return <Navigate to="/sessions" replace />;
+  return <Navigate to="/overview" replace />;
 }
 
 function UnknownRouteFallback({ pluginsLoading }: { pluginsLoading: boolean }) {
@@ -111,27 +113,29 @@ function UnknownRouteFallback({ pluginsLoading }: { pluginsLoading: boolean }) {
     // Render nothing during the plugin-load window — a spinner here would just flash.
     return null;
   }
-  return <Navigate to="/sessions" replace />;
+  return <Navigate to="/overview" replace />;
 }
+
+const OVERVIEW_NAV_ITEM: NavItem = {
+  path: "/overview",
+  label: "Overview",
+  description: "Command center, system telemetry & active workflows",
+  section: "workspace",
+  icon: LayoutDashboard,
+};
 
 const CHAT_NAV_ITEM: NavItem = {
   path: "/chat",
   labelKey: "chat",
   label: "Chat",
+  description: "Terminal chat interface with live reasoning & PTY",
+  section: "workspace",
   icon: Terminal,
 };
 
-/**
- * Built-in routes except /chat.  Chat is rendered persistently (outside
- * <Routes>) when embedded — see the persistent chat host block rendered
- * inline near the bottom of this file — so the PTY child, WebSocket,
- * and xterm instance survive when the user visits another tab and comes
- * back.  A `display:none` toggle hides the terminal without unmounting.
- * Routing still owns the URL so /chat deep-links, browser back/forward,
- * and nav highlight keep working.
- */
 const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/": RootRedirect,
+  "/overview": OverviewPage,
   "/sessions": SessionsPage,
   "/files": FilesPage,
   "/analytics": AnalyticsPage,
@@ -161,41 +165,141 @@ function ChatRouteSink() {
 }
 
 const BUILTIN_NAV_REST: NavItem[] = [
+  // Core Workspace
   {
     path: "/sessions",
     labelKey: "sessions",
     label: "Sessions",
+    description: "Manage and search chat histories & memory trees",
+    section: "workspace",
     icon: MessageSquare,
   },
-  { path: "/files", label: "Files", icon: FolderOpen },
   {
-    path: "/analytics",
-    labelKey: "analytics",
-    label: "Analytics",
-    icon: BarChart3,
+    path: "/files",
+    label: "Files",
+    description: "Workspace file explorer & artifact browser",
+    section: "workspace",
+    icon: FolderOpen,
   },
+
+  // Capabilities & Intelligence
   {
     path: "/models",
     labelKey: "models",
     label: "Models",
+    description: "Model selection, provider keys & mixture of agents",
+    section: "capabilities",
     icon: Cpu,
   },
-  { path: "/logs", labelKey: "logs", label: "Logs", icon: FileText },
-  { path: "/cron", labelKey: "cron", label: "Cron", icon: Clock },
-  { path: "/skills", labelKey: "skills", label: "Skills", icon: Package },
-  { path: "/plugins", labelKey: "plugins", label: "Plugins", icon: Puzzle },
-  { path: "/mcp", label: "MCP", icon: Plug },
-  { path: "/channels", label: "Channels", icon: Radio },
-  { path: "/webhooks", label: "Webhooks", icon: Webhook },
-  { path: "/pairing", label: "Pairing", icon: ShieldCheck },
-  { path: "/profiles", labelKey: "profiles", label: "Profiles", icon: Users },
-  { path: "/config", labelKey: "config", label: "Config", icon: Settings },
-  { path: "/env", labelKey: "keys", label: "Keys", icon: KeyRound },
-  { path: "/system", label: "System", icon: Wrench },
+  {
+    path: "/skills",
+    labelKey: "skills",
+    label: "Skills",
+    description: "Tool bundles, workflows, and autonomous skills",
+    section: "capabilities",
+    icon: Package,
+  },
+  {
+    path: "/plugins",
+    labelKey: "plugins",
+    label: "Plugins",
+    description: "Installed frontend & backend extension plugins",
+    section: "capabilities",
+    icon: Puzzle,
+  },
+  {
+    path: "/mcp",
+    label: "MCP",
+    description: "Model Context Protocol tools and servers",
+    section: "capabilities",
+    icon: Plug,
+  },
+
+  // Automations & Connectors
+  {
+    path: "/cron",
+    labelKey: "cron",
+    label: "Cron",
+    description: "Scheduled recurring tasks & automation blueprints",
+    section: "automations",
+    icon: Clock,
+  },
+  {
+    path: "/channels",
+    label: "Channels",
+    description: "Telegram, Discord, Slack, and messaging gateways",
+    section: "automations",
+    icon: Radio,
+  },
+  {
+    path: "/webhooks",
+    label: "Webhooks",
+    description: "Inbound HTTP hooks, payloads & automations",
+    section: "automations",
+    icon: Webhook,
+  },
+  {
+    path: "/pairing",
+    label: "Pairing",
+    description: "Secure cross-device pairing and token exchange",
+    section: "automations",
+    icon: ShieldCheck,
+  },
+
+  // Operations & System
+  {
+    path: "/analytics",
+    labelKey: "analytics",
+    label: "Analytics",
+    description: "Token spend, message throughput, and cost analytics",
+    section: "management",
+    icon: BarChart3,
+  },
+  {
+    path: "/logs",
+    labelKey: "logs",
+    label: "Logs",
+    description: "System log viewer and server output diagnostics",
+    section: "management",
+    icon: FileText,
+  },
+  {
+    path: "/profiles",
+    labelKey: "profiles",
+    label: "Profiles",
+    description: "Multi-tenant profiles, isolated memory & configs",
+    section: "management",
+    icon: Users,
+  },
+  {
+    path: "/config",
+    labelKey: "config",
+    label: "Config",
+    description: "Interactive agent YAML configuration editor",
+    section: "management",
+    icon: Settings,
+  },
+  {
+    path: "/env",
+    labelKey: "keys",
+    label: "Keys",
+    description: "API keys, secrets & environment variables",
+    section: "management",
+    icon: KeyRound,
+  },
+  {
+    path: "/system",
+    label: "System",
+    description: "Host system diagnostics, process controls & health",
+    section: "management",
+    icon: Wrench,
+  },
   {
     path: "/docs",
     labelKey: "documentation",
     label: "Documentation",
+    description: "Guides, architecture, tool specs, and manuals",
+    section: "management",
     icon: BookOpen,
   },
 ];
@@ -208,6 +312,7 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   FileText,
   FolderOpen,
   KeyRound,
+  LayoutDashboard,
   MessageSquare,
   Package,
   Settings,
@@ -427,9 +532,11 @@ export default function App() {
   );
 
   const builtinNav = useMemo(() => {
-    const base = embeddedChat
-      ? [CHAT_NAV_ITEM, ...BUILTIN_NAV_REST]
-      : BUILTIN_NAV_REST;
+    const base = [
+      OVERVIEW_NAV_ITEM,
+      ...(embeddedChat ? [CHAT_NAV_ITEM] : []),
+      ...BUILTIN_NAV_REST,
+    ];
     return showTokenAnalytics
       ? base
       : base.filter((n) => n.path !== "/analytics");
@@ -616,16 +723,40 @@ export default function App() {
               aria-label={t.app.navigation}
             >
               <ul className="flex flex-col">
-                {sidebarNav.coreItems.map((item) => (
-                  <SidebarNavLink
-                    closeMobile={closeMobile}
-                    collapsed={isDesktopCollapsed}
-                    item={item}
-                    key={item.path}
-                    t={t}
-                    tooltipWarmRef={tooltipWarmRef}
-                  />
-                ))}
+                {sidebarNav.coreItems.map((item, idx) => {
+                  const prev = sidebarNav.coreItems[idx - 1];
+                  const showSection = !prev || prev.section !== item.section;
+                  const sectionLabels: Record<string, string> = {
+                    workspace: "Workspace",
+                    capabilities: "Capabilities",
+                    automations: "Automations",
+                    management: "Operations & System",
+                  };
+                  return (
+                    <div key={item.path}>
+                      {showSection && item.section && (
+                        <li
+                          className={cn(
+                            "px-5 pt-3 pb-1 flex items-center justify-between",
+                            "font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-text-tertiary/60",
+                            isDesktopCollapsed && "lg:hidden",
+                            idx > 0 && "mt-1 border-t border-current/10 pt-2.5",
+                          )}
+                          aria-hidden
+                        >
+                          <span>{sectionLabels[item.section] ?? item.section}</span>
+                        </li>
+                      )}
+                      <SidebarNavLink
+                        closeMobile={closeMobile}
+                        collapsed={isDesktopCollapsed}
+                        item={item}
+                        t={t}
+                        tooltipWarmRef={tooltipWarmRef}
+                      />
+                    </div>
+                  );
+                })}
               </ul>
 
               {sidebarNav.pluginItems.length > 0 && (
@@ -812,13 +943,15 @@ function SidebarNavLink({
   tooltipWarmRef,
   t,
 }: SidebarNavLinkProps) {
-  const { path, label, labelKey, icon: Icon } = item;
+  const { path, label, labelKey, icon: Icon, description } = item;
   const [hovered, setHovered] = useState(false);
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
 
   const navLabel = labelKey
     ? ((t.app.nav as Record<string, string>)[labelKey] ?? label)
     : label;
+  const tooltipText = description ? `${navLabel}: ${description}` : navLabel;
+
   const showTooltip = (event: MouseEvent<HTMLElement> | FocusEvent<HTMLElement>) => {
     setHovered(true);
     setTooltipAnchor(event.currentTarget);
@@ -830,16 +963,18 @@ function SidebarNavLink({
 
   return (
     <li
-      onMouseEnter={collapsed ? showTooltip : undefined}
-      onMouseLeave={collapsed ? hideTooltip : undefined}
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+      className="relative"
     >
       <NavLink
         to={path}
-        end={path === "/sessions"}
+        end={path === "/sessions" || path === "/overview"}
         onClick={closeMobile}
-        aria-label={collapsed ? navLabel : undefined}
-        onFocus={collapsed ? showTooltip : undefined}
-        onBlur={collapsed ? hideTooltip : undefined}
+        aria-label={navLabel}
+        title={!collapsed && description ? description : undefined}
+        onFocus={showTooltip}
+        onBlur={hideTooltip}
         className={({ isActive }) =>
           cn(
             "group/nav relative flex items-center gap-3",
@@ -885,7 +1020,7 @@ function SidebarNavLink({
       </NavLink>
 
       {collapsed && hovered && tooltipAnchor && (
-        <SidebarTooltip anchor={tooltipAnchor} label={navLabel} warmRef={tooltipWarmRef} />
+        <SidebarTooltip anchor={tooltipAnchor} label={tooltipText} warmRef={tooltipWarmRef} />
       )}
     </li>
   );
@@ -1307,6 +1442,8 @@ interface NavItem {
   label: string;
   labelKey?: string;
   path: string;
+  description?: string;
+  section?: "workspace" | "capabilities" | "automations" | "management";
 }
 
 interface SidebarIconWithTooltipProps {
