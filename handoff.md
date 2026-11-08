@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.25)
+# handoff — session 2026-11-05 (1.0.0-build.26)
 
 ## session summary
+Added unit tests in `pkg/compaction/compaction_test.go` validating conversation context compaction, token budgeting, and lossy history summarization.
 Added unit test suite in `pkg/assimilation/inventory_test.go` covering upstream toolchain discovery, structured metadata, and formatted inventory output.
 Updated `vision.md` architecture diagram tree to enumerate all initialized Go subsystems (`agent, gateway, mcp, memory, scheduler, skill, sessionruntime, modelregistry, plugin, adapters`).
 Integrated `EventThinking` streaming event type into `pkg/agent/events.go` and `pkg/agent/agent.go` to surface structured thinking and reasoning deltas during agent streaming.

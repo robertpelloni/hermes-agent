@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.26 (2026-11-05)
+
+### added
+- Unit test suite for Go Compaction subsystem (`pkg/compaction/compaction_test.go`) covering token estimation, threshold triggers, and lossy context summarization.
+
 ## 1.0.0-build.25 (2026-11-05)
 
 ### added
