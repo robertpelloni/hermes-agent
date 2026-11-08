@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.24 (2026-11-05)
+
+### added
+- Updated `vision.md` architecture diagram tree to enumerate all initialized Go subsystems (`agent, gateway, mcp, memory, scheduler, skill, sessionruntime, modelregistry, plugin, adapters`).
+
 ## 1.0.0-build.23 (2026-11-05)
 
 ### added

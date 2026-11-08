@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.23)
+# handoff — session 2026-11-05 (1.0.0-build.24)
 
 ## session summary
+Updated `vision.md` architecture diagram tree to enumerate all initialized Go subsystems (`agent, gateway, mcp, memory, scheduler, skill, sessionruntime, modelregistry, plugin, adapters`).
 Integrated `EventThinking` streaming event type into `pkg/agent/events.go` and `pkg/agent/agent.go` to surface structured thinking and reasoning deltas during agent streaming.
 Added unit tests in `pkg/plugin/manager_test.go` covering plugin discovery, registration, lifecycle hooks (OnLoad/OnUnload), tool propagation, and unloading.
 Enhanced Go Agent core conversation logic (`pkg/agent/agent.go`) to automatically inject historical conversation context from `sessionruntime.Runtime` into `buildInitialMessagesWithSession`, supporting multi-turn continuous dialogues.

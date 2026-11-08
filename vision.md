@@ -15,7 +15,7 @@ hermes-desktop.exe (go)
   ├── spawns → python hermes dashboard (--tui, port 9120)
   ├── opens → browser to dashboard url
   ├── manages → process lifecycle (start, wait, shutdown)
-  └── initializes → go subsystems (agent, gateway, mcp, memory, scheduler, skill)
+  └── initializes → go subsystems (agent, gateway, mcp, memory, scheduler, skill, sessionruntime, modelregistry, plugin, adapters)
 ```
 
 ## user experience goals

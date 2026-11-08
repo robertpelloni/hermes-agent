@@ -14,6 +14,7 @@
 - [x] add unit tests for `pkg/adapters`
 - [x] document future integration points (IPC, Pi-Mono streaming, self-improving loop)
 - [x] align vision.md success metrics with completed Go subsystems and system tray
+- [x] update vision.md architecture diagram with full subsystem initialization list
 - [x] add unit tests for `internal/tui/commands.go`
 
 ## near-term (next session)
