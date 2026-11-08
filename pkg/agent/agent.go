@@ -52,11 +52,15 @@ func DefaultConfig() Config {
 		fmt.Fprintf(os.Stderr, "[hermes] warning: prompt template %q not found, using default\n", promptTemplate)
 	}
 
+	model := getEnvDefault("HERMES_MODEL", "free-llm")
+	provider := getEnvDefault("HERMES_PROVIDER", "local-llm")
+	baseURL := getEnvDefault("HERMES_BASE_URL", fmt.Sprintf("http://127.0.0.1:%s/v1", getEnvDefault("HERMES_FREE_LLM_PORT", "4000")))
+
 	return Config{
-		Model:         "free-llm",
-		Provider:      "local-llm",
+		Model:         model,
+		Provider:      provider,
 		APIKey:        apiKey,
-		BaseURL:       fmt.Sprintf("http://127.0.0.1:%s/v1", getEnvDefault("HERMES_FREE_LLM_PORT", "4000")),
+		BaseURL:       baseURL,
 		MaxTokens:     4096,
 		Temperature:   0.7,
 		TopP:          0.9,

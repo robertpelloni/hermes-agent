@@ -25,7 +25,7 @@
 - [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)
 - [x] implement mcp server with basic tool registration and testing (pkg/mcp/mcp.go)
 - [x] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go) and wire to main
-- [ ] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_PORT
+- [x] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_BASE_URL
 - [ ] integrate pi-ai multi-provider API from pi-mono
 - [ ] integrate pi-agent-core event streaming from pi-mono
 

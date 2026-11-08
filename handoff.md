@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.16)
+# handoff — session 2026-11-05 (1.0.0-build.17)
 
 ## session summary
+Added environment variable configuration overrides for `HERMES_MODEL`, `HERMES_PROVIDER`, and `HERMES_BASE_URL` in Go `agent.DefaultConfig()` (`pkg/agent/agent.go`), verified with `TestDefaultConfigWithEnvOverrides`.
 Added "Future Integration Points & Native Desktop Expansion" architecture roadmap to `docs/design/go-subsystems-architecture.md`, detailing Electron IPC channels, Pi-Mono streaming alignment, and self-improving skill synthesis pipelines.
 Added unit test suite for `pkg/adapters` (`pkg/adapters/adapters_test.go`) covering provider route selection, cost preferences, execution plan formatting, and MCP configuration discovery.
 Updated `docs/design/go-subsystems-architecture.md` with complete specifications for `pkg/agent` (streaming loop, tool execution, session runtime binding), `pkg/sessionruntime` (session persistence, truncation, search), and `pkg/modelregistry` (key resolution, provider models).

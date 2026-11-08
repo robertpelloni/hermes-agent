@@ -273,6 +273,27 @@ func TestDefaultConfigWithTemplate(t *testing.T) {
 	}
 }
 
+// TestDefaultConfigWithEnvOverrides tests that environment variables override DefaultConfig.
+func TestDefaultConfigWithEnvOverrides(t *testing.T) {
+	os.Setenv("HERMES_MODEL", "gpt-4o")
+	defer os.Unsetenv("HERMES_MODEL")
+	os.Setenv("HERMES_PROVIDER", "openai")
+	defer os.Unsetenv("HERMES_PROVIDER")
+	os.Setenv("HERMES_BASE_URL", "https://api.openai.com/v1")
+	defer os.Unsetenv("HERMES_BASE_URL")
+
+	cfg := agent.DefaultConfig()
+	if cfg.Model != "gpt-4o" {
+		t.Errorf("expected model gpt-4o, got %s", cfg.Model)
+	}
+	if cfg.Provider != "openai" {
+		t.Errorf("expected provider openai, got %s", cfg.Provider)
+	}
+	if cfg.BaseURL != "https://api.openai.com/v1" {
+		t.Errorf("expected baseURL https://api.openai.com/v1, got %s", cfg.BaseURL)
+	}
+}
+
 // TestDefaultConfigWithInvalidTemplateFallback tests that invalid templates fall back to default.
 func TestDefaultConfigWithInvalidTemplateFallback(t *testing.T) {
 	os.Setenv("HERMES_PROMPT_TEMPLATE", "nonexistent")

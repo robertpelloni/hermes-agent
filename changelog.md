@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.17 (2026-11-05)
+
+### added
+- Environment variable configuration support for `HERMES_MODEL`, `HERMES_PROVIDER`, and `HERMES_BASE_URL` in Go `agent.DefaultConfig()` (`pkg/agent/agent.go`).
+- Unit test coverage `TestDefaultConfigWithEnvOverrides` in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.16 (2026-11-05)
 
 ### added
