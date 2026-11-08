@@ -32,7 +32,7 @@
 - [x] implement scheduler with cron expression parsing (pkg/scheduler/scheduler.go) and wire to main
 - [x] add environment variable config: HERMES_MODEL, HERMES_PROVIDER, HERMES_BASE_URL
 - [ ] integrate pi-ai multi-provider API from pi-mono
-- [ ] integrate pi-agent-core event streaming from pi-mono
+- [x] integrate pi-agent-core event streaming (EventThinking) from pi-mono
 
 ## features integrated from other harnesses
 - [x] tool parity catalog (hyperharness compat package)

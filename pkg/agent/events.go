@@ -5,6 +5,7 @@ type StreamEventType string
 
 const (
 	EventText      StreamEventType = "text"
+	EventThinking  StreamEventType = "thinking"
 	EventToolStart StreamEventType = "tool_start"
 	EventToolChunk StreamEventType = "tool_chunk"
 	EventToolDone  StreamEventType = "tool_done"

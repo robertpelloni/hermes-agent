@@ -190,7 +190,7 @@ func (a *Agent) handleMessageStreamImplWithSession(ctx context.Context, sessID, 
 
 			case "thinking_delta":
 				if event.Thinking != "" {
-					// thinking is included in the final response
+					ch <- StreamEvent{Type: EventThinking, Text: event.Thinking}
 				}
 
 			case "tool_call_delta":

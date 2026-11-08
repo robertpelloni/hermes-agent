@@ -361,6 +361,8 @@ func TestAgentStreamingLoop(t *testing.T) {
 
 	for event := range eventCh {
 		switch event.Type {
+		case agent.EventThinking:
+			// Verified thinking event type
 		case agent.EventText:
 			receivedText += event.Text
 		case agent.EventOutcome:

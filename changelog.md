@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.23 (2026-11-05)
+
+### added
+- Added `EventThinking` streaming event type to `pkg/agent/events.go` and wired it into `pkg/agent/agent.go` to emit structured reasoning deltas during LLM streaming.
+
 ## 1.0.0-build.22 (2026-11-05)
 
 ### added
