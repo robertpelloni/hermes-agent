@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.19 (2026-11-05)
+
+### added
+- Unit test suite `internal/tui/commands_test.go` covering slash command registry, alias resolution, prefix stripping, and help/status handlers.
+
 ## 1.0.0-build.18 (2026-11-05)
 
 ### added
