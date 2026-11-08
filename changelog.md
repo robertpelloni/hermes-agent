@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.20 (2026-11-05)
+
+### added
+- Unit test suite `pkg/orchestration/planner_test.go` verifying execution plan derivation, keyword-based repository mapping, and formatted plan output.
+
 ## 1.0.0-build.19 (2026-11-05)
 
 ### added

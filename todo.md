@@ -21,7 +21,8 @@
 - [x] expand agent loop (pkg/agent/agent.go) with streaming response handling & tests
 - [x] implement memory store with sqlite persistence (pkg/memory/memory.go)
 - [x] add basic skill loader that discovers .py files in skills/
-- [ ] run go test ./pkg/... ./cmd/...
+- [x] run go test ./pkg/... ./cmd/...
+- [x] add unit tests for `pkg/orchestration/planner.go`
 
 ## medium-term
 - [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)

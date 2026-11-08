@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.19)
+# handoff — session 2026-11-05 (1.0.0-build.20)
 
 ## session summary
+Added unit tests in `pkg/orchestration/planner_test.go` verifying execution plan derivation, keyword-based repository mapping, and formatted plan output.
 Added unit tests in `internal/tui/commands_test.go` covering slash command parsing, alias resolution, prefix stripping, and interactive command execution.
 Aligned `vision.md` metrics and architectural vision with the completed Go subsystems (agent loop with compaction, SQLite memory persistence, recursive skills discovery, MCP server, scheduler, and native Electron system tray).
 Added environment variable configuration overrides for `HERMES_MODEL`, `HERMES_PROVIDER`, and `HERMES_BASE_URL` in Go `agent.DefaultConfig()` (`pkg/agent/agent.go`), verified with `TestDefaultConfigWithEnvOverrides`.
