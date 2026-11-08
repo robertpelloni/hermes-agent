@@ -460,6 +460,19 @@ func TestAgentSessionPersistence(t *testing.T) {
 	if sess.Messages[1].Content[0].Text != "I remember your conversation." {
 		t.Errorf("expected assistant message, got: %s", sess.Messages[1].Content[0].Text)
 	}
+
+	// Turn 2: send another message and verify session grows to 4 messages
+	resp2, err := ag.HandleMessage(ctx, "slack", "user_123", "What did I just say?")
+	if err != nil {
+		t.Fatalf("unexpected turn 2 error: %v", err)
+	}
+	if resp2 == "" {
+		t.Errorf("expected non-empty response for turn 2")
+	}
+	sessUpdated, _ := sessRuntime.Get("slack:user_123")
+	if len(sessUpdated.Messages) != 4 {
+		t.Errorf("expected 4 messages in session after 2 turns, got %d", len(sessUpdated.Messages))
+	}
 }
 
 // TestIntegrationWithRealLLM is a placeholder for real integration tests.

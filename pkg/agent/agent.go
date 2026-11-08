@@ -117,9 +117,9 @@ func (a *Agent) SystemPrompt() string {
 // HandleMessage processes an incoming user message through the full agent loop.
 func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string) (string, error) {
 	fmt.Printf("[hermes] Message from %s/%s: %s\n", platform, userID, text)
-	resp, err := a.runConversation(ctx, text)
+	sessID := fmt.Sprintf("%s:%s", platform, userID)
+	resp, err := a.runConversationWithSession(ctx, sessID, text)
 	if err == nil && a.sessions != nil {
-		sessID := fmt.Sprintf("%s:%s", platform, userID)
 		if _, ok := a.sessions.Get(sessID); !ok {
 			_, _ = a.sessions.Create(sessID)
 		}
@@ -133,16 +133,21 @@ func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string
 // The caller must read from the channel until it is closed.
 func (a *Agent) HandleMessageStream(ctx context.Context, platform, userID, text string) <-chan StreamEvent {
 	ch := make(chan StreamEvent, 64)
+	sessID := fmt.Sprintf("%s:%s", platform, userID)
 	go func() {
 		defer close(ch)
-		a.handleMessageStreamImpl(ctx, text, ch)
+		a.handleMessageStreamImplWithSession(ctx, sessID, text, ch)
 	}()
 	return ch
 }
 
 // handleMessageStreamImpl is the goroutine that emits StreamEvents.
 func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch chan<- StreamEvent) {
-	messages := a.buildInitialMessages(userText)
+	a.handleMessageStreamImplWithSession(ctx, "", userText, ch)
+}
+
+func (a *Agent) handleMessageStreamImplWithSession(ctx context.Context, sessID, userText string, ch chan<- StreamEvent) {
+	messages := a.buildInitialMessagesWithSession(sessID, userText)
 
 	for iter := 0; iter < a.config.MaxIterations; iter++ {
 		messages = a.maybeCompact(messages)
@@ -323,14 +328,19 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 }
 
 
-// runConversation runs the full agent loop:
-// 1. Manage message history
+// runConversation runs the full agent loop without session context.
+func (a *Agent) runConversation(ctx context.Context, userText string) (string, error) {
+	return a.runConversationWithSession(ctx, "", userText)
+}
+
+// runConversationWithSession runs the full agent loop:
+// 1. Manage message history with existing session context if available
 // 2. Call AI for streaming response
 // 3. Handle tool calls
 // 4. Repeat until text response
-func (a *Agent) runConversation(ctx context.Context, userText string) (string, error) {
+func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText string) (string, error) {
 	// Build initial message list
-	messages := a.buildInitialMessages(userText)
+	messages := a.buildInitialMessagesWithSession(sessID, userText)
 
 	// Main conversation loop
 	var finalResponse string
@@ -493,13 +503,31 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 
 // buildInitialMessages creates the initial message list with system prompt and user message.
 func (a *Agent) buildInitialMessages(userText string) []ai.Message {
-	messages := make([]ai.Message, 0, 4)
+	return a.buildInitialMessagesWithSession("", userText)
+}
+
+// buildInitialMessagesWithSession creates the initial message list, including history if available.
+func (a *Agent) buildInitialMessagesWithSession(sessID, userText string) []ai.Message {
+	messages := make([]ai.Message, 0, 8)
 
 	// Add system prompt
 	messages = append(messages, ai.NewTextMessage("system", a.config.SystemPrompt))
 
+	// If session exists, inject past messages
+	if a.sessions != nil && sessID != "" {
+		if sess, ok := a.sessions.Get(sessID); ok && len(sess.Messages) > 0 {
+			for _, m := range sess.Messages {
+				if m.Role != "system" {
+					messages = append(messages, m)
+				}
+			}
+		}
+	}
+
 	// Add user message
-	messages = append(messages, ai.NewTextMessage(ai.RoleUser, userText))
+	if userText != "" {
+		messages = append(messages, ai.NewTextMessage(ai.RoleUser, userText))
+	}
 
 	return messages
 }

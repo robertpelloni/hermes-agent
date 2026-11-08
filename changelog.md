@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.21 (2026-11-05)
+
+### added
+- Multi-turn conversational memory injection in Go Agent (`buildInitialMessagesWithSession` in `pkg/agent/agent.go`), allowing past session history to provide context across sequential turns.
+- Multi-turn conversation persistence test in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.20 (2026-11-05)
 
 ### added

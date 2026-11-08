@@ -23,6 +23,7 @@
 - [x] add basic skill loader that discovers .py files in skills/
 - [x] run go test ./pkg/... ./cmd/...
 - [x] add unit tests for `pkg/orchestration/planner.go`
+- [x] add multi-turn conversation memory context to agent loop
 
 ## medium-term
 - [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)

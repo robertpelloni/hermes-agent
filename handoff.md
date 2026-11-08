@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.20)
+# handoff — session 2026-11-05 (1.0.0-build.21)
 
 ## session summary
+Enhanced Go Agent core conversation logic (`pkg/agent/agent.go`) to automatically inject historical conversation context from `sessionruntime.Runtime` into `buildInitialMessagesWithSession`, supporting multi-turn continuous dialogues.
 Added unit tests in `pkg/orchestration/planner_test.go` verifying execution plan derivation, keyword-based repository mapping, and formatted plan output.
 Added unit tests in `internal/tui/commands_test.go` covering slash command parsing, alias resolution, prefix stripping, and interactive command execution.
 Aligned `vision.md` metrics and architectural vision with the completed Go subsystems (agent loop with compaction, SQLite memory persistence, recursive skills discovery, MCP server, scheduler, and native Electron system tray).
