@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.16 (2026-11-05)
+
+### added
+- Documented `pkg/adapters` (provider route resolution and MCP discovery) in `docs/design/go-subsystems-architecture.md`.
+- Added "Future Integration Points & Native Desktop Expansion" architecture roadmap covering Electron IPC channels, Pi-Mono streaming alignment, and self-improving skill synthesis.
+
 ## 1.0.0-build.15 (2026-11-05)
 
 ### added

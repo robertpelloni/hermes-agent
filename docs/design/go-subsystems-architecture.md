@@ -137,6 +137,14 @@ pkg/
   - Catalogs model capability flags (reasoning, vision, tool use, audio).
   - Provides model search (`SearchModels`) and tabular formatting (`FormatProviderStatus`).
 
+### 2.9 `pkg/adapters` — Provider Route Selection & MCP Discovery
+- **Provider Route Resolution (`SelectProvider`)**:
+  - Evaluates user constraints (`TaskType`, `CostPreference`, `RequireLocal`).
+  - Matches requests against optimal provider/model mappings (e.g. `coding` -> Claude Sonnet / GPT-4o-mini; `budget` -> fast lightweight models; `local` -> Ollama).
+  - Prepares execution configurations with calibrated temperature and max token bounds.
+- **MCP Auto-Discovery (`DiscoverMCPConfigs`)**:
+  - Inspects project root for `.mcp.json` / `mcp.json` specifications and auto-registers external tool servers.
+
 ---
 
 ## 3. Desktop Application Integration (`cmd/hermes/main.go`)
@@ -150,3 +158,21 @@ On launch, `cmd/hermes/main.go`:
 6. Starts the multi-platform gateway (`pkg/gateway`).
 7. Spawns or connects to the Python dashboard on port `9120` and opens the user's browser.
 8. Manages graceful shutdown on `SIGINT`/`SIGTERM` to stop the scheduler, close SQLite connections, and terminate gateway platforms.
+
+---
+
+## 4. Future Integration Points & Native Desktop Expansion
+
+The Go subsystems are structured for ongoing expansion into a unified desktop and edge agent environment:
+
+### 4.1 Bi-Directional Electron Desktop IPC
+- **Direct RPC Channel**: Replace local HTTP polling between Electron (`apps/desktop`) and Go with standard input/output JSON-RPC or a local Unix domain socket (`/tmp/hermes.sock` or Windows named pipe `\\.\pipe\hermes`).
+- **Telemetry Streaming**: Real-time push of agent state transitions, tool call progress, and token consumption directly to Electron's frontend renderer without relying on Python dashboard relaying.
+
+### 4.2 Pi-Mono / Pi-Agent-Core Event Streaming
+- **Unified Stream Types**: Align `pkg/agent.StreamEvent` with Pi-Mono's streaming schemas for structured reasoning deltas (`thinking_delta`), tool executions, and diff patches.
+- **Provider Multi-Harness**: Mirror TypeScript and Rust client harnesses using Go's concurrent `select`/channels for multi-provider racing and automatic fallback when upstream APIs rate-limit.
+
+### 4.3 Autonomous Self-Improving Loop
+- **Skill Generation Pipeline**: Connect `pkg/scheduler` to inspect execution failures in `pkg/sessionruntime`, synthesize new skill definitions in `skills/`, and dynamically reload them via `pkg/skill.LoadFromDir` without restarting the daemon.
+- **Graph Knowledge Consolidation**: Migrate ephemeral conversational memory from SQLite into vector-indexed semantic graph structures (`pkg/memory/graph.go`) for cross-session knowledge retrieval.

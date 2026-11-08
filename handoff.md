@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.15)
+# handoff — session 2026-11-05 (1.0.0-build.16)
 
 ## session summary
+Added "Future Integration Points & Native Desktop Expansion" architecture roadmap to `docs/design/go-subsystems-architecture.md`, detailing Electron IPC channels, Pi-Mono streaming alignment, and self-improving skill synthesis pipelines.
 Added unit test suite for `pkg/adapters` (`pkg/adapters/adapters_test.go`) covering provider route selection, cost preferences, execution plan formatting, and MCP configuration discovery.
 Updated `docs/design/go-subsystems-architecture.md` with complete specifications for `pkg/agent` (streaming loop, tool execution, session runtime binding), `pkg/sessionruntime` (session persistence, truncation, search), and `pkg/modelregistry` (key resolution, provider models).
 Expanded Go agent loop verification: added unit tests for `HandleMessageStream` (`EventText`, `EventOutcome`, `EventDone`) and verified automatic session conversation persistence in `pkg/agent/agent_e2e_test.go`.

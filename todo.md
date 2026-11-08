@@ -12,6 +12,7 @@
 - [x] connect `sessionruntime.Runtime` to `agent.Agent` and `cmd/hermes/main.go` lifecycle
 - [x] expand Go architecture specs in `docs/design/go-subsystems-architecture.md`
 - [x] add unit tests for `pkg/adapters`
+- [x] document future integration points (IPC, Pi-Mono streaming, self-improving loop)
 
 ## near-term (next session)
 - [ ] test foundation mode: START.BAT foundation
