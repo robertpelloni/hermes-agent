@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.25 (2026-11-05)
+
+### added
+- Unit test suite for Go Assimilation Subsystem (`pkg/assimilation/inventory_test.go`) validating toolchain inventory and formatted catalog output.
+
 ## 1.0.0-build.24 (2026-11-05)
 
 ### added
