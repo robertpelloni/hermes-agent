@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.21)
+# handoff — session 2026-11-05 (1.0.0-build.22)
 
 ## session summary
+Added unit tests in `pkg/plugin/manager_test.go` covering plugin discovery, registration, lifecycle hooks (OnLoad/OnUnload), tool propagation, and unloading.
 Enhanced Go Agent core conversation logic (`pkg/agent/agent.go`) to automatically inject historical conversation context from `sessionruntime.Runtime` into `buildInitialMessagesWithSession`, supporting multi-turn continuous dialogues.
 Added unit tests in `pkg/orchestration/planner_test.go` verifying execution plan derivation, keyword-based repository mapping, and formatted plan output.
 Added unit tests in `internal/tui/commands_test.go` covering slash command parsing, alias resolution, prefix stripping, and interactive command execution.

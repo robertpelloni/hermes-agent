@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.22 (2026-11-05)
+
+### added
+- Unit test suite for Go Plugin subsystem (`pkg/plugin/manager_test.go`) covering plugin discovery, registration, lifecycle hooks (OnLoad/OnUnload), tool registration/unregistration, and status reporting.
+
 ## 1.0.0-build.21 (2026-11-05)
 
 ### added

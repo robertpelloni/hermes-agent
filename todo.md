@@ -24,6 +24,7 @@
 - [x] run go test ./pkg/... ./cmd/...
 - [x] add unit tests for `pkg/orchestration/planner.go`
 - [x] add multi-turn conversation memory context to agent loop
+- [x] add unit tests for `pkg/plugin/manager.go`
 
 ## medium-term
 - [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)
