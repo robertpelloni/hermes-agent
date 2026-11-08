@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.17)
+# handoff — session 2026-11-05 (1.0.0-build.18)
 
 ## session summary
+Aligned `vision.md` metrics and architectural vision with the completed Go subsystems (agent loop with compaction, SQLite memory persistence, recursive skills discovery, MCP server, scheduler, and native Electron system tray).
 Added environment variable configuration overrides for `HERMES_MODEL`, `HERMES_PROVIDER`, and `HERMES_BASE_URL` in Go `agent.DefaultConfig()` (`pkg/agent/agent.go`), verified with `TestDefaultConfigWithEnvOverrides`.
 Added "Future Integration Points & Native Desktop Expansion" architecture roadmap to `docs/design/go-subsystems-architecture.md`, detailing Electron IPC channels, Pi-Mono streaming alignment, and self-improving skill synthesis pipelines.
 Added unit test suite for `pkg/adapters` (`pkg/adapters/adapters_test.go`) covering provider route selection, cost preferences, execution plan formatting, and MCP configuration discovery.

@@ -13,6 +13,7 @@
 - [x] expand Go architecture specs in `docs/design/go-subsystems-architecture.md`
 - [x] add unit tests for `pkg/adapters`
 - [x] document future integration points (IPC, Pi-Mono streaming, self-improving loop)
+- [x] align vision.md success metrics with completed Go subsystems and system tray
 
 ## near-term (next session)
 - [ ] test foundation mode: START.BAT foundation

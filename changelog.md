@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.18 (2026-11-05)
+
+### added
+- Updated `vision.md` metrics and architectural alignment reflecting completed Go agent loop, skills system, SQLite memory persistence, task scheduler, MCP server, and Electron system tray.
+
 ## 1.0.0-build.17 (2026-11-05)
 
 ### added
