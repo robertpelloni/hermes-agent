@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.29)
+# handoff — session 2026-11-05 (1.0.0-build.30)
 
 ## session summary
+Added unit tests in `pkg/compat/compat_test.go` verifying the tool parity catalog across popular agentic harnesses, cross-source equivalence queries, and summary reporting.
 Added unit tests in `pkg/lspclient/client_test.go` verifying client singleton lifecycle (`Get()`), safe shutdown (`Close()`), and post-shutdown call safety.
 Added unit tests in `pkg/subcmd/run_binary_test.go` verifying external binary execution, combined stdout/stderr capture, and context cancellation timeout behavior.
 Added unit tests in `pkg/ai/helpers_test.go` validating message construction (`NewTextMessage`, `NewToolCallMessage`, `NewToolResultMessage`), error formatting, and token count estimation.

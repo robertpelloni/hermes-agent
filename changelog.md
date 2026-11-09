@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.30 (2026-11-05)
+
+### added
+- Unit test suite for Go Compat Subsystem (`pkg/compat/compat_test.go`) covering tool parity catalog registration, cross-harness lookup, and summary generation.
+
 ## 1.0.0-build.29 (2026-11-05)
 
 ### added
