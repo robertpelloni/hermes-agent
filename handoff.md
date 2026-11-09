@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.34)
+# handoff — session 2026-11-05 (1.0.0-build.35)
 
 ## session summary
+Added unit tests in `pkg/toolregistry/registry_test.go` covering tool registration, input validation, invocation dispatch, removal, and global registry singleton access.
 Implemented automatic session label derivation in Go Agent `HandleMessage` (`pkg/agent/agent.go`), automatically titling newly created sessions using the first user message, verified with `pkg/agent/agent_e2e_test.go`.
 Updated `roadmap.md` marking Phase 3 (Go Subsystem Expansion) complete, detailing implementations across agent loop, SQLite memory store, skill discovery, MCP server, scheduler, gateway, and session runtime.
 Updated `deploy.md` with complete environment variable documentation and instructions for running the native Electron desktop application with integrated tray controls.

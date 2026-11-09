@@ -26,6 +26,7 @@
 - [x] add unit tests for `pkg/orchestration/planner.go`
 - [x] add multi-turn conversation memory context to agent loop
 - [x] add automatic session label generation to agent loop
+- [x] add unit tests for `pkg/toolregistry/registry.go`
 - [x] add unit tests for `pkg/plugin/manager.go`
 - [x] add unit tests for `pkg/assimilation/inventory.go`
 - [x] add unit tests for `pkg/compaction/compaction.go`

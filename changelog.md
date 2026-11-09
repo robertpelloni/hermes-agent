@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.35 (2026-11-05)
+
+### added
+- Unit test suite for Go ToolRegistry subsystem (`pkg/toolregistry/registry_test.go`) covering tool validation, execution invocation, removal, and global singleton access.
+
 ## 1.0.0-build.34 (2026-11-05)
 
 ### added
