@@ -1,6 +1,8 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] implement `TurnListener` interface and lifecycle callbacks in Go Agent (`pkg/agent/agent.go`)
+- [x] add unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`
 - [x] author unified cross-harness configuration specification (`docs/config/specification.md`)
 - [x] cross-reference configuration architecture across user guide and Go specs
 - [x] implement native system tray with server lifecycle and quit hooks (`apps/desktop/electron/tray.ts`)

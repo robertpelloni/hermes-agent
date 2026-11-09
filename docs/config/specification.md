@@ -86,7 +86,19 @@ secrets:
 
 ---
 
-## 4. Cross-Harness Configuration Parity Validation
+## 4. Behavioral Impact of Key Configuration Options
+
+| Option / Namespace | Permitted Values | Behavioral Impact on Agent Execution |
+| :--- | :--- | :--- |
+| `agent.reasoning_effort` | `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max` | Controls model thinking token allocation. Models supporting reasoning tokens (such as Claude 3.7+ or o-series) adjust thinking budgets accordingly. |
+| `agent.max_turns` | Integer (default: 90) | Governs the maximum tool invocation turns per conversation before injecting completion warnings and invoking the grace turn. |
+| `tool_loop_guardrails.hard_stop_enabled` | `true`, `false` | When true, immediately blocks repeated tool invocations after identical failures, breaking infinite recursion in automated pipelines. |
+| `group_sessions_per_user` | `true`, `false` | When true, isolates user states in shared chat channels (Discord, Slack, Telegram) to prevent prompt cross-contamination and context leakage. |
+| `compression.threshold` | Float (0.10 - 0.90) | Determines at what percentage of context capacity the summarization compressor triggers lossy context compaction. |
+
+---
+
+## 5. Cross-Harness Configuration Parity Validation
 
 Every harness validates the parsed configuration schema against the canonical JSON/YAML definition at startup:
 * **Go Subsystems:** Evaluated in `pkg/agent.DefaultConfig()` and `cmd/hermes/main.go`. Invalid model names or missing provider credentials fail fast before initiating network transports.

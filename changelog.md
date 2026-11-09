@@ -1,5 +1,13 @@
 # changelog
 
+## 1.0.0-build.41 (2026-11-05)
+
+### added
+- Added `TurnListener` interface (`OnTurnStart`, `OnTurnComplete`) and `AddTurnListener` to Go Agent (`pkg/agent/agent.go`) for turn lifecycle observation.
+- Added graceful iteration budget fallback messaging in `runConversationWithSession`.
+- Added unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`.
+- Documented behavioral impact of configuration keys (reasoning effort, turn limits, guardrails, session isolation) in `docs/config/specification.md` and `website/docs/user-guide/configuration.md`.
+
 ## 1.0.0-build.40 (2026-11-05)
 
 ### added

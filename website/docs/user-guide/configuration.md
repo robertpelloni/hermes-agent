@@ -55,6 +55,13 @@ When launching the native Go desktop launcher (`hermes-desktop`) or Electron app
 | `HERMES_MCP_PORT` | `:9090` | Port for the background Model Context Protocol JSON-RPC server |
 | `HERMES_COMPACT_THRESHOLD` | `8000` | Token budget before lossy context compaction occurs |
 
+### Go Subsystems Behavioral Controls
+
+The Go agent runtime supports programmatic lifecycle hooks and behavioral guardrails:
+- **Turn Listeners (`agent.TurnListener`)**: Observers registered via `AddTurnListener` receive real-time notifications (`OnTurnStart`, `OnTurnComplete`) across synchronous turns and streaming executions.
+- **Budget Safety Ceiling**: Once iteration counts reach `MaxIterations`, the agent halts further tool dispatch and returns a graceful summary notification to prevent unbounded API usage.
+- **Context Compaction Gate**: When estimated token counts exceed `HERMES_COMPACT_THRESHOLD` (default 8,000 tokens), the middle message history is lossily summarized while preserving the initial system prompt and recent conversational turns.
+
 ### Electron System Tray
 
 The Electron desktop application includes a native system tray icon with background server process lifecycle management. From the tray menu, users can:

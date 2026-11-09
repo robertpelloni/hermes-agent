@@ -15,11 +15,25 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
 
+// TurnListener is an interface for observing conversation turn lifecycle events.
+type TurnListener interface {
+	OnTurnStart(sessID, prompt string)
+	OnTurnComplete(sessID, prompt, outcome string, err error)
+}
+
 // Agent is the core Hermes AI agent.
 type Agent struct {
-	config   Config
-	running  bool
-	sessions *sessionruntime.Runtime
+	config        Config
+	running       bool
+	sessions      *sessionruntime.Runtime
+	turnListeners []TurnListener
+}
+
+// AddTurnListener attaches a TurnListener to observe conversation turn events.
+func (a *Agent) AddTurnListener(l TurnListener) {
+	if l != nil {
+		a.turnListeners = append(a.turnListeners, l)
+	}
 }
 
 // Config holds agent configuration.
@@ -118,6 +132,10 @@ func (a *Agent) SystemPrompt() string {
 func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string) (string, error) {
 	fmt.Printf("[hermes] Message from %s/%s: %s\n", platform, userID, text)
 	sessID := fmt.Sprintf("%s:%s", platform, userID)
+	for _, l := range a.turnListeners {
+		l.OnTurnStart(sessID, text)
+	}
+
 	resp, err := a.runConversationWithSession(ctx, sessID, text)
 	if err == nil && a.sessions != nil {
 		sess, ok := a.sessions.Get(sessID)
@@ -137,6 +155,11 @@ func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string
 		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, text))
 		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, resp))
 	}
+
+	for _, l := range a.turnListeners {
+		l.OnTurnComplete(sessID, text, resp, err)
+	}
+
 	return resp, err
 }
 
@@ -526,6 +549,10 @@ func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText
 		// No tool calls - this is the final response
 		finalResponse = assistantText
 		break
+	}
+
+	if finalResponse == "" {
+		finalResponse = "Iteration budget reached. Summarizing current progress and awaiting next instructions."
 	}
 
 	return finalResponse, nil

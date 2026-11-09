@@ -552,6 +552,89 @@ func TestAgentSessionPersistence(t *testing.T) {
 	}
 }
 
+// testTurnListener tracks turn events for unit testing.
+type testTurnListener struct {
+	startedSessID  string
+	startedPrompt  string
+	completeSessID string
+	completePrompt string
+	completeResult string
+	completeErr    error
+}
+
+func (l *testTurnListener) OnTurnStart(sessID, prompt string) {
+	l.startedSessID = sessID
+	l.startedPrompt = prompt
+}
+
+func (l *testTurnListener) OnTurnComplete(sessID, prompt, outcome string, err error) {
+	l.completeSessID = sessID
+	l.completePrompt = prompt
+	l.completeResult = outcome
+	l.completeErr = err
+}
+
+// TestAgentTurnListenerHooks tests that TurnListener callbacks fire as expected.
+func TestAgentTurnListenerHooks(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		chunk := map[string]any{
+			"id":      "chatcmpl-hook",
+			"object":  "chat.completion.chunk",
+			"created": time.Now().Unix(),
+			"model":   "test-model",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"delta": map[string]any{
+						"role":    "assistant",
+						"content": "Turn hook verified.",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		fmt.Fprint(w, sseEvent(chunk))
+		fmt.Fprint(w, sseDone())
+	}))
+	defer mockServer.Close()
+
+	cfg := agent.Config{
+		Model:         "test-model",
+		Provider:      "local-llm",
+		APIKey:        "test-key",
+		BaseURL:       mockServer.URL + "/v1",
+		MaxTokens:     1024,
+		Temperature:   0.7,
+		TopP:          0.9,
+		MaxIterations: 5,
+		SystemPrompt:  "You are Hermes.",
+		SessionTTL:    1 * time.Hour,
+	}
+
+	ag := agent.New(cfg)
+	listener := &testTurnListener{}
+	ag.AddTurnListener(listener)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := ag.HandleMessage(ctx, "cli", "alice", "Run turn hook test")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp != "Turn hook verified." {
+		t.Errorf("unexpected response: %s", resp)
+	}
+
+	if listener.startedSessID != "cli:alice" || listener.startedPrompt != "Run turn hook test" {
+		t.Errorf("unexpected start hook values: %s / %s", listener.startedSessID, listener.startedPrompt)
+	}
+	if listener.completeSessID != "cli:alice" || listener.completeResult != "Turn hook verified." {
+		t.Errorf("unexpected complete hook values: %s / %s", listener.completeSessID, listener.completeResult)
+	}
+}
+
 // TestIntegrationWithRealLLM is a placeholder for real integration tests.
 func TestIntegrationWithRealLLM(t *testing.T) {
 	t.Skip("requires real LLM server; set HERMES_TEST_REAL_LLM=1 to run")
