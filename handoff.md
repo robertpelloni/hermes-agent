@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.32)
+# handoff — session 2026-11-05 (1.0.0-build.33)
 
 ## session summary
+Updated `roadmap.md` marking Phase 3 (Go Subsystem Expansion) complete, detailing implementations across agent loop, SQLite memory store, skill discovery, MCP server, scheduler, gateway, and session runtime.
 Updated `deploy.md` with complete environment variable documentation and instructions for running the native Electron desktop application with integrated tray controls.
 Added comprehensive Configuration Architecture & Runtime Environment specification to `docs/design/go-subsystems-architecture.md`, detailing the environment variable matrix, storage directory paths, and configuration resolution hierarchy.
 Added unit tests in `pkg/compat/compat_test.go` verifying the tool parity catalog across popular agentic harnesses, cross-source equivalence queries, and summary reporting.

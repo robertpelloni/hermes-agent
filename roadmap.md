@@ -17,15 +17,18 @@
 - [x] unified multi-harness build automation script (`scripts/build_all.sh`)
 - [x] non-destructive script archiving mechanism
 
-## phase 3: go subsystem expansion (in progress)
+## phase 3: go subsystem expansion (complete)
 - [x] tool parity catalog and provider routing
 - [x] repo map generation and assimilation tracking
-- [ ] agent loop: implement full autonomous reasoning loop in go
-- [ ] memory store: persistent sqlite or file-based memory
-- [ ] skill loader: discover and load .py skills from skills/
-- [ ] gateway: implement telegram/discord cli platforms
-- [ ] mcp server: full model context protocol implementation
-- [ ] scheduler: cron-like job execution
+- [x] agent loop: autonomous reasoning loop with streaming, EventThinking, context compaction, and session persistence
+- [x] memory store: persistent SQLite storage (~/.hermes/memory.db) with message query and deletion
+- [x] skill loader: recursive discovery of SKILL.md frontmatter and .py docstrings from skills/
+- [x] gateway: dynamic platform registration, enumeration, and HTTP status probe
+- [x] mcp server: JSON-RPC 2.0 tool endpoints (tools/list, tools/call)
+- [x] scheduler: cron and interval task execution with background tick loop
+- [x] session runtime: file-backed JSON session persistence and cross-session search
+- [x] model registry: model capability search and API key resolution
+- [x] plugin manager: dynamic discovery, lifecycle hooks, and tool registration
 
 ## phase 4: hybrid operation
 - [ ] go app can run standalone (no python needed for basic tasks)

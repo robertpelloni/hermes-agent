@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.33 (2026-11-05)
+
+### added
+- Marked Phase 3 in `roadmap.md` complete, tracking implementations and test suites across agent loop, memory store, skill loader, gateway, mcp server, scheduler, session runtime, model registry, and plugin manager.
+
 ## 1.0.0-build.32 (2026-11-05)
 
 ### added
