@@ -1,5 +1,12 @@
 # changelog
 
+## 1.0.0-build.42 (2026-11-05)
+
+### added
+- Added `TurnMetrics` struct and `TurnMetricsListener` interface in Go Agent (`pkg/agent/agent.go`) for tracking iteration counts, prompt tokens, completion tokens, and total tokens.
+- Added grace-turn system prompt injection on the final iteration to ensure clean wrap-up without unbounded tool churning.
+- Verified metrics calculation and lifecycle event dispatch with `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.41 (2026-11-05)
 
 ### added

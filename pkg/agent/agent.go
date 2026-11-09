@@ -15,10 +15,24 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
 
+// TurnMetrics captures token usage and turn count metrics for a completed conversation turn.
+type TurnMetrics struct {
+	Iterations       int
+	PromptTokens     int
+	CompletionTokens int
+	TotalTokens      int
+}
+
 // TurnListener is an interface for observing conversation turn lifecycle events.
 type TurnListener interface {
 	OnTurnStart(sessID, prompt string)
 	OnTurnComplete(sessID, prompt, outcome string, err error)
+}
+
+// TurnMetricsListener extends TurnListener to receive token usage metrics upon turn completion.
+type TurnMetricsListener interface {
+	TurnListener
+	OnTurnMetrics(sessID string, metrics TurnMetrics)
 }
 
 // Agent is the core Hermes AI agent.
@@ -136,7 +150,7 @@ func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string
 		l.OnTurnStart(sessID, text)
 	}
 
-	resp, err := a.runConversationWithSession(ctx, sessID, text)
+	resp, metrics, err := a.runConversationWithSessionAndMetrics(ctx, sessID, text)
 	if err == nil && a.sessions != nil {
 		sess, ok := a.sessions.Get(sessID)
 		if !ok {
@@ -158,6 +172,9 @@ func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string
 
 	for _, l := range a.turnListeners {
 		l.OnTurnComplete(sessID, text, resp, err)
+		if ml, ok := l.(TurnMetricsListener); ok {
+			ml.OnTurnMetrics(sessID, metrics)
+		}
 	}
 
 	return resp, err
@@ -392,13 +409,26 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 // 3. Handle tool calls
 // 4. Repeat until text response
 func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText string) (string, error) {
+	resp, _, err := a.runConversationWithSessionAndMetrics(ctx, sessID, userText)
+	return resp, err
+}
+
+func (a *Agent) runConversationWithSessionAndMetrics(ctx context.Context, sessID, userText string) (string, TurnMetrics, error) {
 	// Build initial message list
 	messages := a.buildInitialMessagesWithSession(sessID, userText)
 
 	// Main conversation loop
 	var finalResponse string
+	var metrics TurnMetrics
 
 	for iter := 0; iter < a.config.MaxIterations; iter++ {
+		metrics.Iterations = iter + 1
+
+		// If this is the final iteration, inject a guidance message asking to summarize
+		if iter == a.config.MaxIterations-1 && len(messages) > 1 {
+			messages = append(messages, ai.NewTextMessage("system", "You have reached your final turn budget. Provide your final concise answer or progress summary now without calling additional tools."))
+		}
+
 		// Check compaction before each LLM call
 		messages = a.maybeCompact(messages)
 
@@ -419,7 +449,7 @@ func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText
 			Tools:       toolDefs,
 		})
 		if err != nil {
-			return "", fmt.Errorf("ai stream error: %w", err)
+			return "", metrics, fmt.Errorf("ai stream error: %w", err)
 		}
 
 		// Accumulate tool call arguments by index
@@ -433,7 +463,7 @@ func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText
 		for event := range stream {
 			switch event.Type {
 			case "error":
-				return "", fmt.Errorf("ai streaming error: %w", event.Error)
+				return "", metrics, fmt.Errorf("ai streaming error: %w", event.Error)
 
 			case "text_delta":
 				assistantText += event.Text
@@ -555,7 +585,11 @@ func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText
 		finalResponse = "Iteration budget reached. Summarizing current progress and awaiting next instructions."
 	}
 
-	return finalResponse, nil
+	metrics.PromptTokens = ai.EstimateTokenCount(messages)
+	metrics.CompletionTokens = len(strings.Fields(finalResponse))
+	metrics.TotalTokens = metrics.PromptTokens + metrics.CompletionTokens
+
+	return finalResponse, metrics, nil
 }
 
 // buildInitialMessages creates the initial message list with system prompt and user message.

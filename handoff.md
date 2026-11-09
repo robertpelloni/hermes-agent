@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.41)
+# handoff — session 2026-11-05 (1.0.0-build.42)
 
 ## session summary
+Implemented `TurnMetrics` struct and `TurnMetricsListener` interface in Go Agent (`pkg/agent/agent.go`) along with single grace-turn wrap-up system prompt injection. Verified metrics computation and hook dispatch with `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`.
 Implemented `TurnListener` interface (`OnTurnStart`, `OnTurnComplete`) and `AddTurnListener` in Go Agent (`pkg/agent/agent.go`) for conversation turn lifecycle observation and budget enforcement.
 Added unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go` and verified turn callback executions.
 Documented the behavioral impact of key configuration options across runtime subsystems in `docs/config/specification.md` and updated `website/docs/user-guide/configuration.md`.

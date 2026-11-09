@@ -554,12 +554,13 @@ func TestAgentSessionPersistence(t *testing.T) {
 
 // testTurnListener tracks turn events for unit testing.
 type testTurnListener struct {
-	startedSessID  string
-	startedPrompt  string
-	completeSessID string
-	completePrompt string
-	completeResult string
-	completeErr    error
+	startedSessID   string
+	startedPrompt   string
+	completeSessID  string
+	completePrompt  string
+	completeResult  string
+	completeErr     error
+	receivedMetrics *agent.TurnMetrics
 }
 
 func (l *testTurnListener) OnTurnStart(sessID, prompt string) {
@@ -572,6 +573,10 @@ func (l *testTurnListener) OnTurnComplete(sessID, prompt, outcome string, err er
 	l.completePrompt = prompt
 	l.completeResult = outcome
 	l.completeErr = err
+}
+
+func (l *testTurnListener) OnTurnMetrics(sessID string, metrics agent.TurnMetrics) {
+	l.receivedMetrics = &metrics
 }
 
 // TestAgentTurnListenerHooks tests that TurnListener callbacks fire as expected.
@@ -632,6 +637,15 @@ func TestAgentTurnListenerHooks(t *testing.T) {
 	}
 	if listener.completeSessID != "cli:alice" || listener.completeResult != "Turn hook verified." {
 		t.Errorf("unexpected complete hook values: %s / %s", listener.completeSessID, listener.completeResult)
+	}
+	if listener.receivedMetrics == nil {
+		t.Fatal("expected TurnMetrics to be received")
+	}
+	if listener.receivedMetrics.Iterations != 1 {
+		t.Errorf("expected 1 iteration, got %d", listener.receivedMetrics.Iterations)
+	}
+	if listener.receivedMetrics.PromptTokens <= 0 || listener.receivedMetrics.CompletionTokens <= 0 {
+		t.Errorf("expected positive token metrics, got: %+v", listener.receivedMetrics)
 	}
 }
 

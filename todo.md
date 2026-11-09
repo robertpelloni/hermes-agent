@@ -1,6 +1,7 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] implement `TurnMetrics` and `TurnMetricsListener` with grace turn injection in Go Agent (`pkg/agent/agent.go`)
 - [x] implement `TurnListener` interface and lifecycle callbacks in Go Agent (`pkg/agent/agent.go`)
 - [x] add unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`
 - [x] author unified cross-harness configuration specification (`docs/config/specification.md`)
