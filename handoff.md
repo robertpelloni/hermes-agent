@@ -1,6 +1,8 @@
-# handoff — session 2026-11-05 (1.0.0-build.39)
+# handoff — session 2026-11-05 (1.0.0-build.40)
 
 ## session summary
+Authored the unified cross-harness configuration specification at `docs/config/specification.md` defining configuration precedence hierarchies, multi-harness schema mappings (Python, Go, Desktop Electron/React), external secrets management (1Password, Bitwarden Secrets Manager), and zero-leakage protocols.
+Updated and cross-referenced configuration documentation across `website/docs/user-guide/configuration.md` and `docs/design/go-subsystems-architecture.md`.
 Documented realized architecture milestones and added aggressive technical proposals in `ideas.md` (hybrid Go-Python direct IPC bridge, embedded native webview without browser overhead, and sqlite-vec pure local semantic memory search).
 Added session turn persistence and automatic session label derivation to `HandleMessageStream` in Go Agent (`pkg/agent/agent.go`), verified with `TestAgentStreamingSessionPersistence` in `pkg/agent/agent_e2e_test.go`.
 Documented Desktop & Go Subsystems runtime environment variables and Electron system tray management in the user guide at `website/docs/user-guide/configuration.md`.

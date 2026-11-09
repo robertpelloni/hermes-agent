@@ -1,6 +1,8 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] author unified cross-harness configuration specification (`docs/config/specification.md`)
+- [x] cross-reference configuration architecture across user guide and Go specs
 - [x] implement native system tray with server lifecycle and quit hooks (`apps/desktop/electron/tray.ts`)
 - [x] write tray unit tests and verify in vitest (`apps/desktop/electron/tray.test.ts`)
 - [x] create consolidated Command Center / Overview page (`web/src/pages/OverviewPage.tsx`)

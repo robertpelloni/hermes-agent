@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.40 (2026-11-05)
+
+### added
+- Authored unified cross-harness configuration specification at `docs/config/specification.md` defining precedence hierarchies, schema mappings, secrets manager integrations, and cross-harness verification contracts.
+- Cross-referenced configuration architecture in user guide (`website/docs/user-guide/configuration.md`) and Go architecture docs (`docs/design/go-subsystems-architecture.md`).
+
 ## 1.0.0-build.39 (2026-11-05)
 
 ### added

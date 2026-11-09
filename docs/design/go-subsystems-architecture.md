@@ -213,3 +213,5 @@ Configuration values are resolved using the following order of precedence:
 2. **Environment Variables**: Overrides loaded from current process or `.env`.
 3. **Configuration Files**: `.mcp.json`, `plugin.yaml`, and skill manifests.
 4. **Hardcoded Defaults**: Safe fallbacks defined in `DefaultConfig()` routines.
+
+For the comprehensive cross-harness specification encompassing Go, Python, Desktop, and Secret Managers, see [`docs/config/specification.md`](../config/specification.md).

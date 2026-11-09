@@ -6,7 +6,7 @@ description: "Configure Hermes Agent — config.yaml, providers, models, API key
 
 # Configuration
 
-All settings are stored in the `~/.hermes/` directory for easy access.
+All settings are stored in the `~/.hermes/` directory for easy access. For cross-harness architecture specifications across Python, Go, and Desktop, see the [Universal Configuration Specification](https://github.com/robertpelloni/hermes-agent/blob/main/docs/config/specification.md).
 
 :::tip Easiest path to a working `config.yaml`
 Run `hermes setup --portal` — one OAuth gets you a model provider and all four Tool Gateway tools without hand-editing YAML. Portal subscribers also get 10% off token-billed providers. See [Nous Portal](/integrations/nous-portal).
