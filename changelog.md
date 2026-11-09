@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.32 (2026-11-05)
+
+### added
+- Updated `deploy.md` with complete environment variable documentation and Electron desktop launch instructions.
+
 ## 1.0.0-build.31 (2026-11-05)
 
 ### added

@@ -31,15 +31,28 @@ This script compiles the Go desktop binary, runs Go unit tests, builds productio
 | variable | default | description |
 |----------|---------|-------------|
 | HERMES_PORT | 9120 | dashboard port |
-| HERMES_MODEL | (optional) | model name for agent |
-| HERMES_PROVIDER | (optional) | provider name (e.g. openrouter) |
+| HERMES_MODEL | free-llm | model name for agent |
+| HERMES_PROVIDER | local-llm | provider name (e.g. openai, anthropic, local-llm) |
+| HERMES_BASE_URL | http://127.0.0.1:4000/v1 | LLM server API base URL |
+| HERMES_FREE_LLM_PORT | 4000 | fallback port for local development LLM server |
+| HERMES_FREE_LLM_API_KEY | not-needed | API key for local LLM requests |
+| HERMES_MCP_PORT | :9090 | port for background Model Context Protocol JSON-RPC server |
+| HERMES_COMPACT_THRESHOLD | 8000 | token count threshold before lossy context compaction kicks in |
+| HERMES_PROMPT_TEMPLATE | default | prompt template name loaded from pkg/prompttemplates |
 
 ## running
 
-### direct
+### direct (Go Launcher)
 ```bash
 ./hermes-desktop.exe
 ```
+
+### Electron Desktop App
+```bash
+cd apps/desktop
+npm run dev
+```
+Launches the native Electron desktop shell with the integrated system tray icon and background server lifecycle management.
 
 ### via start.bat
 ```cmd
