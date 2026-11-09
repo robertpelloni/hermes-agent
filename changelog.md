@@ -1,5 +1,12 @@
 # changelog
 
+## 1.0.0-build.43 (2026-11-05)
+
+### added
+- Implemented `RunStandaloneLoop` in Go Agent (`pkg/agent/standalone.go`) for standalone CLI conversation execution with interactive slash commands (`/help`, `/model`, `/sessions`, `/clear`, `/quit`, `/exit`) and live streaming terminal output.
+- Added unit test suite `TestStandaloneLoopSlashCommands` in `pkg/agent/standalone_test.go`.
+- Connected `RunStandaloneLoop` to `cmd/hermes/main.go` under default agent interactive execution mode.
+
 ## 1.0.0-build.42 (2026-11-05)
 
 ### added

@@ -1,6 +1,9 @@
-# handoff — session 2026-11-05 (1.0.0-build.42)
+# handoff — session 2026-11-05 (1.0.0-build.43)
 
 ## session summary
+Implemented `RunStandaloneLoop` in Go Agent (`pkg/agent/standalone.go`) for standalone CLI conversation execution with interactive slash commands (`/help`, `/model`, `/sessions`, `/clear`, `/quit`, `/exit`) and live streaming terminal output.
+Added unit test suite `TestStandaloneLoopSlashCommands` in `pkg/agent/standalone_test.go`.
+Connected `RunStandaloneLoop` to `cmd/hermes/main.go` under default agent interactive execution mode.
 Implemented `TurnMetrics` struct and `TurnMetricsListener` interface in Go Agent (`pkg/agent/agent.go`) along with single grace-turn wrap-up system prompt injection. Verified metrics computation and hook dispatch with `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`.
 Implemented `TurnListener` interface (`OnTurnStart`, `OnTurnComplete`) and `AddTurnListener` in Go Agent (`pkg/agent/agent.go`) for conversation turn lifecycle observation and budget enforcement.
 Added unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go` and verified turn callback executions.

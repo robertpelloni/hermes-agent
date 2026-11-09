@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -200,32 +199,22 @@ func main() {
 		defer cliCmd.Process.Kill()
 
 	case "agent":
-		// Agent mode – run the Go agent interactively via stdin/stdout.
-		fmt.Println("running Go agent interactively. type '/quit' or '/exit' to stop.")
+		// Agent mode – run the Go agent interactively via stdin/stdout with streaming and slash commands.
+		sessRuntime := sessionruntime.NewRuntime("", true)
 		ag := agent.New(agent.DefaultConfig())
+		ag.SetSessionRuntime(sessRuntime)
+
 		if err := ag.Run(ctx); err != nil {
 			log.Printf("agent run error: %v", err)
 		}
-		scanner := bufio.NewScanner(os.Stdin)
-		for {
-			fmt.Print("\n> ")
-			if !scanner.Scan() {
-				break
-			}
-			line := strings.TrimSpace(scanner.Text())
-			if line == "" {
-				continue
-			}
-			if line == "/quit" || line == "/exit" {
-				fmt.Println("exiting agent")
-				break
-			}
-			resp, err := ag.HandleMessage(ctx, "cli", "local", line)
-			if err != nil {
-				fmt.Printf("Error: %v\n", err)
-			} else {
-				fmt.Println(resp)
-			}
+
+		if err := ag.RunStandaloneLoop(ctx, agent.StandaloneOptions{
+			In:           os.Stdin,
+			Out:          os.Stdout,
+			SessionID:    "cli:local",
+			PromptPrefix: "\n> ",
+		}); err != nil {
+			log.Printf("agent session ended: %v", err)
 		}
 		return
 

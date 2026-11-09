@@ -1,6 +1,9 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] implement `RunStandaloneLoop` with interactive slash commands in Go Agent (`pkg/agent/standalone.go`)
+- [x] add unit test suite `TestStandaloneLoopSlashCommands` (`pkg/agent/standalone_test.go`)
+- [x] wire `RunStandaloneLoop` into `cmd/hermes/main.go`
 - [x] implement `TurnMetrics` and `TurnMetricsListener` with grace turn injection in Go Agent (`pkg/agent/agent.go`)
 - [x] implement `TurnListener` interface and lifecycle callbacks in Go Agent (`pkg/agent/agent.go`)
 - [x] add unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`
