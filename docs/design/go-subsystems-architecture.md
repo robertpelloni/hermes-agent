@@ -176,3 +176,40 @@ The Go subsystems are structured for ongoing expansion into a unified desktop an
 ### 4.3 Autonomous Self-Improving Loop
 - **Skill Generation Pipeline**: Connect `pkg/scheduler` to inspect execution failures in `pkg/sessionruntime`, synthesize new skill definitions in `skills/`, and dynamically reload them via `pkg/skill.LoadFromDir` without restarting the daemon.
 - **Graph Knowledge Consolidation**: Migrate ephemeral conversational memory from SQLite into vector-indexed semantic graph structures (`pkg/memory/graph.go`) for cross-session knowledge retrieval.
+
+---
+
+## 5. Configuration Architecture & Runtime Environment
+
+The Go subsystems follow a unified, zero-friction configuration hierarchy to ensure seamless interoperability between headless CLI runs, the Python dashboard server, and the Electron desktop shell.
+
+### 5.1 Environment Variable Matrix
+
+| Variable | Default | Subsystem | Description |
+|---|---|---|---|
+| `HERMES_MODEL` | `free-llm` | `pkg/agent` | Model identifier passed to AI completion endpoints |
+| `HERMES_PROVIDER` | `local-llm` | `pkg/agent` | AI provider implementation (e.g. `openai`, `anthropic`, `local-llm`) |
+| `HERMES_BASE_URL` | `http://127.0.0.1:<PORT>/v1` | `pkg/agent` | Base URL for LLM API calls |
+| `HERMES_FREE_LLM_PORT` | `4000` | `pkg/agent` | Local fallback port for development LLM server |
+| `HERMES_FREE_LLM_API_KEY` | `not-needed` | `pkg/agent` | API key for local LLM requests |
+| `HERMES_PORT` | `9120` | `cmd/hermes` | Port where the primary Python web dashboard is served |
+| `HERMES_MCP_PORT` | `:9090` | `pkg/mcp` | HTTP port for the background Model Context Protocol JSON-RPC server |
+| `HERMES_COMPACT_THRESHOLD` | `8000` | `pkg/agent` | Token count threshold before lossy compaction kicks in |
+| `HERMES_PROMPT_TEMPLATE` | `default` | `pkg/prompttemplates` | Prompt template identifier loaded from disk or defaults |
+
+### 5.2 Persistence & Storage Paths
+
+All persistent artifacts are stored within the user's home configuration directory:
+
+- **SQLite Ephemeral & Conversation Store**: `~/.hermes/memory.db` (`pkg/memory`)
+- **JSON Session History Store**: `~/.hermes/sessions/*.json` (`pkg/sessionruntime`)
+- **Autonomous Skills Repository**: `<repo-root>/skills/` or `~/.hermes/skills/` (`pkg/skill`)
+- **Plugin Manifests & Shared Libraries**: `~/.hermes/plugins/` and `~/.hermes/go-plugins/` (`pkg/plugin`)
+
+### 5.3 Configuration Resolution Precedence
+
+Configuration values are resolved using the following order of precedence:
+1. **Command Line Flags**: (`--dashboard`, `--gateway`, `--cli`, `--foundation`, `--port`).
+2. **Environment Variables**: Overrides loaded from current process or `.env`.
+3. **Configuration Files**: `.mcp.json`, `plugin.yaml`, and skill manifests.
+4. **Hardcoded Defaults**: Safe fallbacks defined in `DefaultConfig()` routines.

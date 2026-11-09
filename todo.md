@@ -32,6 +32,7 @@
 - [x] add unit tests for `pkg/subcmd/run_binary.go`
 - [x] add unit tests for `pkg/lspclient/client.go`
 - [x] add unit tests for `pkg/compat/compat.go`
+- [x] document Configuration Architecture & Runtime Environment in go-subsystems-architecture.md
 
 ## medium-term
 - [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)

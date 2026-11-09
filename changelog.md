@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.31 (2026-11-05)
+
+### added
+- Documented Configuration Architecture & Runtime Environment in `docs/design/go-subsystems-architecture.md`, including environment variable matrix, persistence paths, and configuration resolution hierarchy.
+
 ## 1.0.0-build.30 (2026-11-05)
 
 ### added
