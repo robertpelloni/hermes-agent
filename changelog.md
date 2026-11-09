@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.36 (2026-11-05)
+
+### added
+- Unit test suite for Go RepoMap subsystem (`pkg/repomap/repomap_test.go`) validating ranked repository map generation, mentioned file scoring boosts, and line counting.
+
 ## 1.0.0-build.35 (2026-11-05)
 
 ### added
