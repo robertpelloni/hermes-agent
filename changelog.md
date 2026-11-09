@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.28 (2026-11-05)
+
+### added
+- Unit test suite for Go Subcmd subsystem (`pkg/subcmd/run_binary_test.go`) covering external binary execution, combined stdout/stderr capture, and context timeout cancellation.
+
 ## 1.0.0-build.27 (2026-11-05)
 
 ### added

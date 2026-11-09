@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.27)
+# handoff — session 2026-11-05 (1.0.0-build.28)
 
 ## session summary
+Added unit tests in `pkg/subcmd/run_binary_test.go` verifying external binary execution, combined stdout/stderr capture, and context cancellation timeout behavior.
 Added unit tests in `pkg/ai/helpers_test.go` validating message construction (`NewTextMessage`, `NewToolCallMessage`, `NewToolResultMessage`), error formatting, and token count estimation.
 Added unit tests in `pkg/compaction/compaction_test.go` validating conversation context compaction, token budgeting, and lossy history summarization.
 Added unit test suite in `pkg/assimilation/inventory_test.go` covering upstream toolchain discovery, structured metadata, and formatted inventory output.
