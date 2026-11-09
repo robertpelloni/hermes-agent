@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.36)
+# handoff — session 2026-11-05 (1.0.0-build.37)
 
 ## session summary
+Documented Desktop & Go Subsystems runtime environment variables and Electron system tray management in the user guide at `website/docs/user-guide/configuration.md`.
 Added unit tests in `pkg/repomap/repomap_test.go` validating ranked repository map generation, line counting, mentioned file scoring boosts, and text map rendering.
 Added unit tests in `pkg/toolregistry/registry_test.go` covering tool registration, input validation, invocation dispatch, removal, and global registry singleton access.
 Implemented automatic session label derivation in Go Agent `HandleMessage` (`pkg/agent/agent.go`), automatically titling newly created sessions using the first user message, verified with `pkg/agent/agent_e2e_test.go`.

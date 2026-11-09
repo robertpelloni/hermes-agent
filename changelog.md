@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.37 (2026-11-05)
+
+### added
+- Documented Desktop & Go Subsystems environment configuration and Electron system tray management in user guide documentation (`website/docs/user-guide/configuration.md`).
+
 ## 1.0.0-build.36 (2026-11-05)
 
 ### added

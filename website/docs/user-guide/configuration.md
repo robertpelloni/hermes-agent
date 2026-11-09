@@ -38,6 +38,30 @@ hermes config migrate      # Interactively add missing options
 
 # Examples:
 hermes config set model anthropic/claude-opus-4
+
+## Desktop & Go Subsystems Environment
+
+When launching the native Go desktop launcher (`hermes-desktop`) or Electron application, you can configure runtime behavior using environment variables:
+
+| Variable | Default | Description |
+|---|---|---|
+| `HERMES_MODEL` | `free-llm` | AI model identifier passed to agent completions |
+| `HERMES_PROVIDER` | `local-llm` | AI provider (e.g. `openai`, `anthropic`, `local-llm`) |
+| `HERMES_BASE_URL` | `http://127.0.0.1:4000/v1` | Base URL for LLM API calls |
+| `HERMES_PORT` | `9120` | Port where the web dashboard server is hosted |
+| `HERMES_MCP_PORT` | `:9090` | Port for the background Model Context Protocol JSON-RPC server |
+| `HERMES_COMPACT_THRESHOLD` | `8000` | Token budget before lossy context compaction occurs |
+
+### Electron System Tray
+
+The Electron desktop application includes a native system tray icon with background server process lifecycle management. From the tray menu, users can:
+- View live backend server status.
+- Focus and restore the main window.
+- Open the web dashboard in their default browser.
+- Safely restart the backend server.
+- Cleanly quit Hermes and shut down all background server processes.
+
+```bash
 hermes config set terminal.backend docker
 hermes config set OPENROUTER_API_KEY sk-or-...  # Saves to .env
 ```
