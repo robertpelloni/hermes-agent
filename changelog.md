@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.34 (2026-11-05)
+
+### added
+- Automatic session label derivation from the initial user prompt in Go Agent `HandleMessage` (`pkg/agent/agent.go`), verified with unit tests in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.33 (2026-11-05)
 
 ### added

@@ -120,8 +120,19 @@ func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string
 	sessID := fmt.Sprintf("%s:%s", platform, userID)
 	resp, err := a.runConversationWithSession(ctx, sessID, text)
 	if err == nil && a.sessions != nil {
-		if _, ok := a.sessions.Get(sessID); !ok {
-			_, _ = a.sessions.Create(sessID)
+		sess, ok := a.sessions.Get(sessID)
+		if !ok {
+			created, errCreate := a.sessions.Create(sessID)
+			if errCreate == nil {
+				sess = created
+			}
+		}
+		if sess != nil && sess.Label == "" {
+			label := strings.TrimSpace(text)
+			if len(label) > 40 {
+				label = label[:40] + "..."
+			}
+			sess.Label = label
 		}
 		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, text))
 		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, resp))

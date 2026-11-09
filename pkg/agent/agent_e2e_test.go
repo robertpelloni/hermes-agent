@@ -453,6 +453,9 @@ func TestAgentSessionPersistence(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected session 'slack:user_123' to be created")
 	}
+	if sess.Label != "Hello there!" {
+		t.Errorf("expected session label 'Hello there!', got: %s", sess.Label)
+	}
 	if len(sess.Messages) != 2 {
 		t.Fatalf("expected 2 messages, got %d", len(sess.Messages))
 	}
