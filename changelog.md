@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.39 (2026-11-05)
+
+### added
+- Documented realized architectural milestones and added aggressive design proposals in `ideas.md` (hybrid Go-Python direct IPC bridge, embedded native webview, and sqlite-vec semantic memory search).
+
 ## 1.0.0-build.38 (2026-11-05)
 
 ### added

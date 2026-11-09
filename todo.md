@@ -39,6 +39,7 @@
 - [x] document Configuration Architecture & Runtime Environment in go-subsystems-architecture.md
 - [x] update deploy.md with environment variables matrix and Electron desktop launch guide
 - [x] document Desktop & Go Subsystems environment and system tray in website user guide
+- [x] document realized milestones and aggressive proposals in ideas.md
 - [x] mark completed Phase 3 subsystems in roadmap.md
 
 ## medium-term

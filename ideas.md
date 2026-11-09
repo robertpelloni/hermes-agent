@@ -1,12 +1,21 @@
 # ideas
 
+## realized architectures (current milestones)
+- **Native System Tray with Server Lifecycle**: Built in `apps/desktop/electron/tray.ts`, enabling backend restart, browser launch, and clean process termination.
+- **Local SQLite Memory Persistence**: Pure-Go SQLite store (`modernc.org/sqlite`) at `~/.hermes/memory.db` with session enumeration and message management.
+- **Unified Multi-Harness Build**: `scripts/build_all.sh` building Go binaries, running Go test suites, compiling Web UI distribution, and typechecking Desktop.
+- **Autonomous Go Reasoning Loop**: Implemented with streaming (`HandleMessageStream`), structured reasoning (`EventThinking`), and lossy context compaction.
+
 ## refactoring & re-architecture
 
-### hybrid go-python bridge
-instead of a full go rewrite, use the go app as a native desktop shell that communicates with the python agent via json-rpc (like the tui gateway does). this gives native window management + full python agent capabilities.
+### hybrid go-python direct ipc bridge
+instead of local HTTP polling, connect Electron Desktop directly to the Go daemon over a local Unix domain socket (`/tmp/hermes.sock`) or Windows named pipe (`\\.\pipe\hermes`) using JSON-RPC 2.0. This cuts out network port overhead and gives native window management with zero HTTP roundtrips.
 
-### electron-free desktop
-the desktop app currently launches a browser window. consider embedding a webview (like webview/webview go library) so the dashboard renders inside a native window without requiring a full browser. this would feel more like a real desktop app.
+### embedded native webview
+replace browser launching with an embedded webview (such as `webview/webview` Go bindings or Wails) to render the dashboard inside an ultra-lightweight native OS window (<15MB RAM) without requiring full Chromium or Electron runtimes.
+
+### sqlite-vec semantic memory search
+compile `sqlite-vec` or pure-Go vector embeddings directly into `pkg/memory` so that cross-session semantic search happens locally in microseconds without cloud embedding APIs.
 
 ### windmill-style chaining
 take inspiration from windmill.dev — allow users to chain ai actions visually in a drag-and-drop ui. the go app could host a local web server for this visual editor.
