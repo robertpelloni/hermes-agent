@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.29 (2026-11-05)
+
+### added
+- Unit test suite for Go LSP Client subsystem (`pkg/lspclient/client_test.go`) covering client singleton initialization, safe closing, and lifecycle protection against post-shutdown calls.
+
 ## 1.0.0-build.28 (2026-11-05)
 
 ### added

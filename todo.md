@@ -30,6 +30,7 @@
 - [x] add unit tests for `pkg/compaction/compaction.go`
 - [x] add unit tests for `pkg/ai/helpers.go`
 - [x] add unit tests for `pkg/subcmd/run_binary.go`
+- [x] add unit tests for `pkg/lspclient/client.go`
 
 ## medium-term
 - [x] implement gateway platform registration and lifecycle (pkg/gateway/gateway.go)
