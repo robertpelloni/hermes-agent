@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.27 (2026-11-05)
+
+### added
+- Unit test suite for Go AI Helpers subsystem (`pkg/ai/helpers_test.go`) covering text message creation, tool call/result serialization, error formatting, and token count estimation.
+
 ## 1.0.0-build.26 (2026-11-05)
 
 ### added
