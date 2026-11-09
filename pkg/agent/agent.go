@@ -329,6 +329,25 @@ func (a *Agent) handleMessageStreamImplWithSession(ctx context.Context, sessID, 
 		}
 
 		// No tool calls – this is the final response
+		if a.sessions != nil && sessID != "" {
+			sess, ok := a.sessions.Get(sessID)
+			if !ok {
+				created, errCreate := a.sessions.Create(sessID)
+				if errCreate == nil {
+					sess = created
+				}
+			}
+			if sess != nil && sess.Label == "" {
+				label := strings.TrimSpace(userText)
+				if len(label) > 40 {
+					label = label[:40] + "..."
+				}
+				sess.Label = label
+			}
+			_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, userText))
+			_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, assistantText))
+		}
+
 		ch <- StreamEvent{Type: EventOutcome, Outcome: assistantText}
 		ch <- StreamEvent{Type: EventDone}
 		return

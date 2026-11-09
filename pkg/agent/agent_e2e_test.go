@@ -388,6 +388,78 @@ func TestAgentStreamingLoop(t *testing.T) {
 	}
 }
 
+// TestAgentStreamingSessionPersistence tests that HandleMessageStream saves messages into SessionRuntime.
+func TestAgentStreamingSessionPersistence(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		chunk := map[string]any{
+			"id":      "chatcmpl-stream-persist",
+			"object":  "chat.completion.chunk",
+			"created": time.Now().Unix(),
+			"model":   "test-model",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"delta": map[string]any{
+						"role":    "assistant",
+						"content": "Streaming turn saved.",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		fmt.Fprint(w, sseEvent(chunk))
+		fmt.Fprint(w, sseDone())
+	}))
+	defer mockServer.Close()
+
+	tempDir, err := os.MkdirTemp("", "hermes-agent-stream-sess-*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	sessRuntime := sessionruntime.NewRuntime(tempDir, true)
+
+	cfg := agent.Config{
+		Model:         "test-model",
+		Provider:      "local-llm",
+		APIKey:        "test-key",
+		BaseURL:       mockServer.URL + "/v1",
+		MaxTokens:     1024,
+		Temperature:   0.7,
+		TopP:          0.9,
+		MaxIterations: 5,
+		SystemPrompt:  "You are Hermes.",
+		SessionTTL:    1 * time.Hour,
+	}
+
+	ag := agent.New(cfg)
+	ag.SetSessionRuntime(sessRuntime)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	eventCh := ag.HandleMessageStream(ctx, "cli", "stream_user", "Testing stream persistence")
+	for range eventCh {
+		// drain
+	}
+
+	sess, ok := sessRuntime.Get("cli:stream_user")
+	if !ok {
+		t.Fatalf("expected session cli:stream_user to be created")
+	}
+	if len(sess.Messages) != 2 {
+		t.Fatalf("expected 2 messages, got %d", len(sess.Messages))
+	}
+	if sess.Messages[1].Content[0].Text != "Streaming turn saved." {
+		t.Errorf("unexpected assistant response: %s", sess.Messages[1].Content[0].Text)
+	}
+	if sess.Label != "Testing stream persistence" {
+		t.Errorf("expected session label 'Testing stream persistence', got: %s", sess.Label)
+	}
+}
+
 // TestAgentSessionPersistence tests that agent conversation turns are saved into SessionRuntime.
 func TestAgentSessionPersistence(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

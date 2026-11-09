@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.37)
+# handoff — session 2026-11-05 (1.0.0-build.38)
 
 ## session summary
+Added session turn persistence and automatic session label derivation to `HandleMessageStream` in Go Agent (`pkg/agent/agent.go`), verified with `TestAgentStreamingSessionPersistence` in `pkg/agent/agent_e2e_test.go`.
 Documented Desktop & Go Subsystems runtime environment variables and Electron system tray management in the user guide at `website/docs/user-guide/configuration.md`.
 Added unit tests in `pkg/repomap/repomap_test.go` validating ranked repository map generation, line counting, mentioned file scoring boosts, and text map rendering.
 Added unit tests in `pkg/toolregistry/registry_test.go` covering tool registration, input validation, invocation dispatch, removal, and global registry singleton access.

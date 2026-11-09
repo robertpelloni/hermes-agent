@@ -38,6 +38,9 @@ hermes config migrate      # Interactively add missing options
 
 # Examples:
 hermes config set model anthropic/claude-opus-4
+hermes config set terminal.backend docker
+hermes config set OPENROUTER_API_KEY sk-or-...  # Saves to .env
+```
 
 ## Desktop & Go Subsystems Environment
 
@@ -60,11 +63,6 @@ The Electron desktop application includes a native system tray icon with backgro
 - Open the web dashboard in their default browser.
 - Safely restart the backend server.
 - Cleanly quit Hermes and shut down all background server processes.
-
-```bash
-hermes config set terminal.backend docker
-hermes config set OPENROUTER_API_KEY sk-or-...  # Saves to .env
-```
 
 :::tip
 The `hermes config set` command automatically routes values to the right file — API keys are saved to `.env`, everything else to `config.yaml`.

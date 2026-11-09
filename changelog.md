@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.38 (2026-11-05)
+
+### added
+- Session turn persistence and automatic session label derivation support for `HandleMessageStream` in Go Agent (`pkg/agent/agent.go`), verified by `TestAgentStreamingSessionPersistence` in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.37 (2026-11-05)
 
 ### added
