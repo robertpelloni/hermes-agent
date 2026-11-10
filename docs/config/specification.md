@@ -51,6 +51,8 @@ fallback_models:
 | `mcp.servers` | `mcp.Server` / `adapters` | `mcp_config.servers` | Settings > MCP Servers | `HERMES_MCP_CONFIG` |
 | `gateway.port` | `gateway.Gateway.Port` | `gateway.port` | Backend connection pool | `HERMES_GATEWAY_PORT` |
 | `gateway.host` | `gateway.Gateway.Host` | `gateway.host` | Backend connection host | `HERMES_GATEWAY_HOST` |
+| `gateway.relay.url` | `gateway.RelayURL` | `gateway.relay.endpoint` | Connector settings | `HERMES_RELAY_URL` |
+| `gateway.relay.token` | `gateway.RelayToken` | `gateway.relay.token` | Connector auth | `HERMES_RELAY_TOKEN` |
 | `compaction.token_limit` | `compaction.Compactor.Budget`| `compactor.max_tokens` | Chat context meter | `HERMES_TOKEN_LIMIT` |
 
 ---

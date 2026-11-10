@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.46 (2026-11-05)
+
+### added
+- Documented Gateway Relay & Connector WebSocket Protocol integration in `docs/design/go-subsystems-architecture.md` according to Relay ↔ Connector Contract (v1).
+- Added gateway relay parameters (`gateway.relay.url`, `gateway.relay.token`) to `docs/config/specification.md`.
+
 ## 1.0.0-build.45 (2026-11-05)
 
 ### added

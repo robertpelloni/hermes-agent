@@ -215,3 +215,18 @@ Configuration values are resolved using the following order of precedence:
 4. **Hardcoded Defaults**: Safe fallbacks defined in `DefaultConfig()` routines.
 
 For the comprehensive cross-harness specification encompassing Go, Python, Desktop, and Secret Managers, see [`docs/config/specification.md`](../config/specification.md).
+
+---
+
+## 6. Gateway Relay & Connector WebSocket Protocol
+
+The Go gateway (`pkg/gateway`) is architected to interface with remote messaging connectors following the **Relay ↔ Connector Contract (v1)** documented at [`docs/relay-connector-contract.md`](../relay-connector-contract.md).
+
+### 6.1 Handshake & Capability Negotiation
+1. **Outbound Dial**: The gateway connects to the external connector WebSocket endpoint (e.g. `ws://127.0.0.1:8765/relay`).
+2. **Capability Exchange**: The connector responds with a `CapabilityDescriptor` defining platform traits:
+   - `char_limit`: Maximum message length (e.g. 2000 for Discord, 4096 for Telegram).
+   - `supports_markdown`: Native markdown support flags.
+   - `supports_threads`: Thread creation and session isolation capabilities.
+3. **Session Ingestion**: Incoming user turns arrive as normalized `MessageEvent` objects and are routed directly to `Agent.HandleMessageStream` with platform prefixing (`platform:channel_or_user_id`).
+4. **Outbound Streaming & Drafts**: Streaming text deltas and tool invocation notices are dispatched back over the WebSocket channel, preserving real-time conversational fidelity.
