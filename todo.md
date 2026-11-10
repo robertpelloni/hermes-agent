@@ -1,6 +1,7 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] add unit test suite for `pkg/aiclient` (`pkg/aiclient/aiclient_test.go`)
 - [x] document gateway relay & connector WebSocket protocol in `docs/design/go-subsystems-architecture.md`
 - [x] add gateway relay configuration parameters in `docs/config/specification.md`
 - [x] attach `memory.Store` and connect global tools to MCP server in `cmd/hermes/main.go`

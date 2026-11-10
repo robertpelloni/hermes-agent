@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.47 (2026-11-05)
+
+### added
+- Added unit tests for `pkg/aiclient` in `pkg/aiclient/aiclient_test.go` covering client instantiation and OpenAI-compatible streaming completion.
+
 ## 1.0.0-build.46 (2026-11-05)
 
 ### added
