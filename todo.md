@@ -1,6 +1,7 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] attach `memory.Store` and connect global tools to MCP server in `cmd/hermes/main.go`
 - [x] integrate persistent `memory.Store` into Go Agent conversation loops (`pkg/agent/agent.go`)
 - [x] add unit test suite `TestAgentMemoryStorePersistence` (`pkg/agent/agent_e2e_test.go`)
 - [x] implement `RunStandaloneLoop` with interactive slash commands in Go Agent (`pkg/agent/standalone.go`)

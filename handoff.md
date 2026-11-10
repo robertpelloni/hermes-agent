@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.44)
+# handoff — session 2026-11-05 (1.0.0-build.45)
 
 ## session summary
+Attached persistent `memory.Store` to Go `agent.Agent` in `cmd/hermes/main.go` and connected global tools from `toolregistry.Global()` to the background MCP server (`mcpServer.RegisterTool`), ensuring complete functional parity with the Python dashboard.
 Integrated persistent SQLite `memory.Store` into Go Agent conversation loops (`pkg/agent/agent.go`) via `SetMemoryStore` and `MemoryStore`, saving conversation messages into `memory.db` for both synchronous turns and streaming.
 Added unit test suite `TestAgentMemoryStorePersistence` in `pkg/agent/agent_e2e_test.go`.
 Implemented `RunStandaloneLoop` in Go Agent (`pkg/agent/standalone.go`) for standalone CLI conversation execution with interactive slash commands (`/help`, `/model`, `/sessions`, `/clear`, `/quit`, `/exit`) and live streaming terminal output.

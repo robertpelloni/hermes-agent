@@ -27,6 +27,7 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/scheduler"
 	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 	"github.com/robertpelloni/hermes-agent/pkg/skill"
+	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
 
 func findPython() (string, error) {
@@ -287,8 +288,19 @@ func main() {
 	sched := scheduler.New()
 	sched.Start(ctx)
 
+	// Connect global tools to MCP server
+	globalTools := toolregistry.Global().List()
+	for _, t := range globalTools {
+		toolName := t.Name
+		mcpServer.RegisterTool(toolName, func(args map[string]any) (any, error) {
+			return toolregistry.Global().Call(toolName, args, map[string]any{})
+		})
+	}
+	fmt.Printf("  tools registered to MCP: %d\n", len(globalTools))
+
 	ag := agent.New(agent.DefaultConfig())
 	ag.SetSessionRuntime(sessRuntime)
+	ag.SetMemoryStore(memStore)
 
 	// Start MCP server in background
 	go func() {

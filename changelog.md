@@ -1,5 +1,12 @@
 # changelog
 
+## 1.0.0-build.45 (2026-11-05)
+
+### added
+- Attached persistent `memory.Store` to Go `agent.Agent` in `cmd/hermes/main.go`.
+- Registered global tools from `toolregistry.Global()` directly to the background MCP JSON-RPC server (`mcpServer.RegisterTool`), ensuring parity with the Python dashboard.
+- Verified build and subsystem tests across `pkg/` and `cmd/`.
+
 ## 1.0.0-build.44 (2026-11-05)
 
 ### added
