@@ -720,6 +720,76 @@ func TestAgentMemoryStorePersistence(t *testing.T) {
 	}
 }
 
+// TestAgentMemoryStoreHistoryRehydration verifies that history is rehydrated from memory.Store.
+func TestAgentMemoryStoreHistoryRehydration(t *testing.T) {
+	var receivedPromptHistory []string
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		chunk := map[string]any{
+			"id":      "chatcmpl-rehydrate",
+			"object":  "chat.completion.chunk",
+			"created": time.Now().Unix(),
+			"model":   "test-model",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"delta": map[string]any{
+						"role":    "assistant",
+						"content": "Rehydration turn response.",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		fmt.Fprint(w, sseEvent(chunk))
+		fmt.Fprint(w, sseDone())
+	}))
+	defer mockServer.Close()
+
+	memStore := memory.NewStore()
+	defer memStore.Close()
+
+	sessID := fmt.Sprintf("cli:rehydrate_%d", time.Now().UnixNano())
+	_ = memStore.SaveMessage(sessID, "user", "Previous persisted question")
+	_ = memStore.SaveMessage(sessID, "assistant", "Previous persisted answer")
+
+	cfg := agent.Config{
+		Model:         "test-model",
+		Provider:      "local-llm",
+		APIKey:        "test-key",
+		BaseURL:       mockServer.URL + "/v1",
+		MaxTokens:     1024,
+		Temperature:   0.7,
+		TopP:          0.9,
+		MaxIterations: 5,
+		SystemPrompt:  "You are Hermes.",
+		SessionTTL:    1 * time.Hour,
+	}
+
+	ag := agent.New(cfg)
+	ag.SetMemoryStore(memStore)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := ag.HandleMessage(ctx, "cli", strings.TrimPrefix(sessID, "cli:"), "Second turn query")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp != "Rehydration turn response." {
+		t.Errorf("unexpected response: %s", resp)
+	}
+
+	allMsgs, err := memStore.LoadMessages(sessID)
+	if err != nil {
+		t.Fatalf("failed to load messages: %v", err)
+	}
+	if len(allMsgs) != 4 {
+		t.Fatalf("expected 4 total messages in memory store after 2nd turn, got %d", len(allMsgs))
+	}
+	_ = receivedPromptHistory
+}
+
 // TestIntegrationWithRealLLM is a placeholder for real integration tests.
 func TestIntegrationWithRealLLM(t *testing.T) {
 	t.Skip("requires real LLM server; set HERMES_TEST_REAL_LLM=1 to run")

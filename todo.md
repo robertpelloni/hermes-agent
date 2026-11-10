@@ -1,6 +1,8 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] implement SQLite memory store history rehydration in Go Agent (`pkg/agent/agent.go`)
+- [x] add unit test suite `TestAgentMemoryStoreHistoryRehydration` in `pkg/agent/agent_e2e_test.go`
 - [x] expand `roadmap.md` with in-depth specifications for Agent Loop and SQLite Memory Store
 - [x] add unit test suite for `pkg/aiclient` (`pkg/aiclient/aiclient_test.go`)
 - [x] document gateway relay & connector WebSocket protocol in `docs/design/go-subsystems-architecture.md`

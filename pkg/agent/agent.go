@@ -625,11 +625,25 @@ func (a *Agent) buildInitialMessagesWithSession(sessID, userText string) []ai.Me
 	messages = append(messages, ai.NewTextMessage("system", a.config.SystemPrompt))
 
 	// If session exists, inject past messages
+	var historyLoaded bool
 	if a.sessions != nil && sessID != "" {
 		if sess, ok := a.sessions.Get(sessID); ok && len(sess.Messages) > 0 {
 			for _, m := range sess.Messages {
 				if m.Role != "system" {
 					messages = append(messages, m)
+				}
+			}
+			historyLoaded = true
+		}
+	}
+
+	// Fallback to SQLite memory store if session runtime has no history
+	if !historyLoaded && a.memStore != nil && sessID != "" {
+		if storedMsgs, err := a.memStore.LoadMessages(sessID); err == nil && len(storedMsgs) > 0 {
+			for _, sm := range storedMsgs {
+				if sm.Role != "system" {
+					role := ai.MessageRole(sm.Role)
+					messages = append(messages, ai.NewTextMessage(role, sm.Content))
 				}
 			}
 		}

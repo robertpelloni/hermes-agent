@@ -1,6 +1,8 @@
-# handoff — session 2026-11-05 (1.0.0-build.48)
+# handoff — session 2026-11-05 (1.0.0-build.49)
 
 ## session summary
+Added SQLite persistent memory store conversation rehydration to `buildInitialMessagesWithSession` in Go Agent (`pkg/agent/agent.go`), allowing sessions without active memory caches to recover turn history automatically from `memory.db`.
+Added unit test suite `TestAgentMemoryStoreHistoryRehydration` in `pkg/agent/agent_e2e_test.go`.
 Expanded `roadmap.md` with in-depth specifications for the Go Agent Loop (streaming pipelines, turn lifecycle listeners, context compaction gates, grace turns, standalone interactive slash command loop) and SQLite Memory Store (WAL mode, relational turn persistence, query/delete APIs, and vector indexing roadmap).
 Added unit tests for `pkg/aiclient` in `pkg/aiclient/aiclient_test.go` covering client instantiation and OpenAI-compatible streaming completion.
 Documented Gateway Relay & Connector WebSocket Protocol integration in `docs/design/go-subsystems-architecture.md` according to the Relay ↔ Connector Contract (v1). Added connector parameters (`gateway.relay.url`, `gateway.relay.token`) to the Universal Configuration Architecture Specification in `docs/config/specification.md`.

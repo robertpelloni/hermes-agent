@@ -1,5 +1,11 @@
 # changelog
 
+## 1.0.0-build.49 (2026-11-05)
+
+### added
+- Added SQLite persistent memory store conversation rehydration to `buildInitialMessagesWithSession` in Go Agent (`pkg/agent/agent.go`), allowing sessions without active memory caches to recover turn history automatically from `memory.db`.
+- Added unit test suite `TestAgentMemoryStoreHistoryRehydration` in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.48 (2026-11-05)
 
 ### added
