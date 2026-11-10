@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.48 (2026-11-05)
+
+### added
+- Expanded `roadmap.md` with in-depth implementation details for the Go Agent Loop (streaming events, TurnMetrics listeners, compaction gates, grace turns, slash commands) and SQLite Memory Store (WAL mode, relational persistence, and vector indexing roadmap).
+
 ## 1.0.0-build.47 (2026-11-05)
 
 ### added

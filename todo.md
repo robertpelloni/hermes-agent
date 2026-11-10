@@ -1,6 +1,7 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] expand `roadmap.md` with in-depth specifications for Agent Loop and SQLite Memory Store
 - [x] add unit test suite for `pkg/aiclient` (`pkg/aiclient/aiclient_test.go`)
 - [x] document gateway relay & connector WebSocket protocol in `docs/design/go-subsystems-architecture.md`
 - [x] add gateway relay configuration parameters in `docs/config/specification.md`

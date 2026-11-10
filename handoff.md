@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.47)
+# handoff — session 2026-11-05 (1.0.0-build.48)
 
 ## session summary
+Expanded `roadmap.md` with in-depth specifications for the Go Agent Loop (streaming pipelines, turn lifecycle listeners, context compaction gates, grace turns, standalone interactive slash command loop) and SQLite Memory Store (WAL mode, relational turn persistence, query/delete APIs, and vector indexing roadmap).
 Added unit tests for `pkg/aiclient` in `pkg/aiclient/aiclient_test.go` covering client instantiation and OpenAI-compatible streaming completion.
 Documented Gateway Relay & Connector WebSocket Protocol integration in `docs/design/go-subsystems-architecture.md` according to the Relay ↔ Connector Contract (v1). Added connector parameters (`gateway.relay.url`, `gateway.relay.token`) to the Universal Configuration Architecture Specification in `docs/config/specification.md`.
 Attached persistent `memory.Store` to Go `agent.Agent` in `cmd/hermes/main.go` and connected global tools from `toolregistry.Global()` to the background MCP server (`mcpServer.RegisterTool`), ensuring complete functional parity with the Python dashboard.

@@ -21,7 +21,16 @@
 - [x] tool parity catalog and provider routing
 - [x] repo map generation and assimilation tracking
 - [x] agent loop: autonomous reasoning loop with streaming, EventThinking, context compaction, and session persistence
+  - Streaming pipeline emitting `StreamEvent` items (`EventText`, `EventThinking`, `EventToolStart`, `EventToolDone`, `EventOutcome`, `EventDone`).
+  - Turn lifecycle and observability hooks (`TurnListener`, `TurnMetricsListener`) for real-time token and iteration telemetry.
+  - Context compaction gate (`maybeCompact`) summarizing middle conversational turns when exceeding token thresholds while preserving system prompts and recent dialogs.
+  - Turn budget enforcement with single grace-turn system prompt injection to ensure safe, concise wrap-ups without unbounded tool execution.
+  - Interactive standalone CLI loop (`RunStandaloneLoop`) with integrated slash commands (`/help`, `/model`, `/sessions`, `/clear`, `/quit`, `/exit`).
 - [x] memory store: persistent SQLite storage (~/.hermes/memory.db) with message query and deletion
+  - WAL-mode SQLite database using pure-Go `modernc.org/sqlite` (zero CGO runtime dependency).
+  - Dual-layer architecture: rapid concurrent in-memory map combined with durable relational storage.
+  - Robust conversation turn persistence (`SaveMessage`), history retrieval (`LoadMessages`), session listing (`ListSessions`), message counting (`CountMessages`), and deletion (`DeleteSession`).
+  - Future expansion: integration of pure-Go semantic vector indexing (`sqlite-vec`) for semantic recall across long-term session boundaries.
 - [x] skill loader: recursive discovery of SKILL.md frontmatter and .py docstrings from skills/
 - [x] gateway: dynamic platform registration, enumeration, and HTTP status probe
 - [x] mcp server: JSON-RPC 2.0 tool endpoints (tools/list, tools/call)
