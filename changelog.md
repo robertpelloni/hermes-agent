@@ -1,5 +1,10 @@
 # changelog
 
+## 1.0.0-build.50 (2026-11-05)
+
+### added
+- Refined dashboard instance conflict detection in `cmd/hermes/main.go` using a bounded 2-second timeout client with multi-endpoint probing (`/overview` and `/`), preventing startup hangs when port 9120 is occupied.
+
 ## 1.0.0-build.49 (2026-11-05)
 
 ### added

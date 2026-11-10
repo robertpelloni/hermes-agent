@@ -133,12 +133,22 @@ func main() {
 		// Dashboard (or TUI) mode – same launch path, the Python web server
 		// always serves the TUI when `--tui` flag is passed.
 		dashRunning := false
-		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s", port))
+		checkClient := &http.Client{Timeout: 2 * time.Second}
+		resp, err := checkClient.Get(fmt.Sprintf("http://127.0.0.1:%s/overview", port))
 		if err == nil && resp.StatusCode == http.StatusOK {
 			resp.Body.Close()
 			dashRunning = true
-			fmt.Printf("  dashboard already running on http://127.0.0.1:%s\n", port)
+			fmt.Printf("  existing dashboard instance detected on http://127.0.0.1:%s\n", port)
 		} else if err == nil {
+			// Check if root responds
+			rootResp, rootErr := checkClient.Get(fmt.Sprintf("http://127.0.0.1:%s/", port))
+			if rootErr == nil && rootResp.StatusCode == http.StatusOK {
+				rootResp.Body.Close()
+				dashRunning = true
+				fmt.Printf("  existing dashboard instance detected on http://127.0.0.1:%s\n", port)
+			} else if rootErr == nil {
+				rootResp.Body.Close()
+			}
 			resp.Body.Close()
 		}
 

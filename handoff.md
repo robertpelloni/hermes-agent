@@ -1,6 +1,7 @@
-# handoff — session 2026-11-05 (1.0.0-build.49)
+# handoff — session 2026-11-05 (1.0.0-build.50)
 
 ## session summary
+Refined dashboard instance conflict detection and probing in `cmd/hermes/main.go` using a bounded 2-second timeout client with multi-endpoint checks (`/overview`, `/`), ensuring smooth launcher transitions without hanging.
 Added SQLite persistent memory store conversation rehydration to `buildInitialMessagesWithSession` in Go Agent (`pkg/agent/agent.go`), allowing sessions without active memory caches to recover turn history automatically from `memory.db`.
 Added unit test suite `TestAgentMemoryStoreHistoryRehydration` in `pkg/agent/agent_e2e_test.go`.
 Expanded `roadmap.md` with in-depth specifications for the Go Agent Loop (streaming pipelines, turn lifecycle listeners, context compaction gates, grace turns, standalone interactive slash command loop) and SQLite Memory Store (WAL mode, relational turn persistence, query/delete APIs, and vector indexing roadmap).
