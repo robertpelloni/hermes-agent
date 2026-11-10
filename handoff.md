@@ -1,6 +1,8 @@
-# handoff — session 2026-11-05 (1.0.0-build.43)
+# handoff — session 2026-11-05 (1.0.0-build.44)
 
 ## session summary
+Integrated persistent SQLite `memory.Store` into Go Agent conversation loops (`pkg/agent/agent.go`) via `SetMemoryStore` and `MemoryStore`, saving conversation messages into `memory.db` for both synchronous turns and streaming.
+Added unit test suite `TestAgentMemoryStorePersistence` in `pkg/agent/agent_e2e_test.go`.
 Implemented `RunStandaloneLoop` in Go Agent (`pkg/agent/standalone.go`) for standalone CLI conversation execution with interactive slash commands (`/help`, `/model`, `/sessions`, `/clear`, `/quit`, `/exit`) and live streaming terminal output.
 Added unit test suite `TestStandaloneLoopSlashCommands` in `pkg/agent/standalone_test.go`.
 Connected `RunStandaloneLoop` to `cmd/hermes/main.go` under default agent interactive execution mode.

@@ -1,6 +1,8 @@
 # todo
 
 ## immediate (completed this turn)
+- [x] integrate persistent `memory.Store` into Go Agent conversation loops (`pkg/agent/agent.go`)
+- [x] add unit test suite `TestAgentMemoryStorePersistence` (`pkg/agent/agent_e2e_test.go`)
 - [x] implement `RunStandaloneLoop` with interactive slash commands in Go Agent (`pkg/agent/standalone.go`)
 - [x] add unit test suite `TestStandaloneLoopSlashCommands` (`pkg/agent/standalone_test.go`)
 - [x] wire `RunStandaloneLoop` into `cmd/hermes/main.go`

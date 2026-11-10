@@ -1,5 +1,12 @@
 # changelog
 
+## 1.0.0-build.44 (2026-11-05)
+
+### added
+- Integrated persistent `memory.Store` into Go Agent (`pkg/agent/agent.go`) via `SetMemoryStore` and `MemoryStore`.
+- Added automatic conversation message persistence (`SaveMessage`) into SQLite backed store across both synchronous turns and streaming executions.
+- Added unit test suite `TestAgentMemoryStorePersistence` in `pkg/agent/agent_e2e_test.go`.
+
 ## 1.0.0-build.43 (2026-11-05)
 
 ### added

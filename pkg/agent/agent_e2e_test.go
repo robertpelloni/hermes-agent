@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
+	"github.com/robertpelloni/hermes-agent/pkg/memory"
 	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 )
 
@@ -646,6 +647,76 @@ func TestAgentTurnListenerHooks(t *testing.T) {
 	}
 	if listener.receivedMetrics.PromptTokens <= 0 || listener.receivedMetrics.CompletionTokens <= 0 {
 		t.Errorf("expected positive token metrics, got: %+v", listener.receivedMetrics)
+	}
+}
+
+// TestAgentMemoryStorePersistence verifies that conversation turns are persisted in memory.Store.
+func TestAgentMemoryStorePersistence(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		chunk := map[string]any{
+			"id":      "chatcmpl-mem",
+			"object":  "chat.completion.chunk",
+			"created": time.Now().Unix(),
+			"model":   "test-model",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"delta": map[string]any{
+						"role":    "assistant",
+						"content": "Memory turn persisted.",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		fmt.Fprint(w, sseEvent(chunk))
+		fmt.Fprint(w, sseDone())
+	}))
+	defer mockServer.Close()
+
+	cfg := agent.Config{
+		Model:         "test-model",
+		Provider:      "local-llm",
+		APIKey:        "test-key",
+		BaseURL:       mockServer.URL + "/v1",
+		MaxTokens:     1024,
+		Temperature:   0.7,
+		TopP:          0.9,
+		MaxIterations: 5,
+		SystemPrompt:  "You are Hermes.",
+		SessionTTL:    1 * time.Hour,
+	}
+
+	ag := agent.New(cfg)
+	memStore := memory.NewStore()
+	defer memStore.Close()
+	ag.SetMemoryStore(memStore)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	sessID := fmt.Sprintf("cli:mem_user_%d", time.Now().UnixNano())
+	resp, err := ag.HandleMessage(ctx, "cli", strings.TrimPrefix(sessID, "cli:"), "Persist to SQLite memory")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp != "Memory turn persisted." {
+		t.Errorf("unexpected response: %s", resp)
+	}
+
+	msgs, err := memStore.LoadMessages(sessID)
+	if err != nil {
+		t.Fatalf("failed to load messages from memory store: %v", err)
+	}
+	if len(msgs) != 2 {
+		t.Fatalf("expected 2 messages in memory store, got %d", len(msgs))
+	}
+	if msgs[0].Role != "user" || msgs[0].Content != "Persist to SQLite memory" {
+		t.Errorf("unexpected user message in memory store: %+v", msgs[0])
+	}
+	if msgs[1].Role != "assistant" || msgs[1].Content != "Memory turn persisted." {
+		t.Errorf("unexpected assistant message in memory store: %+v", msgs[1])
 	}
 }
 

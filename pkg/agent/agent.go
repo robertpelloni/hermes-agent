@@ -10,6 +10,7 @@ import (
 
 	"github.com/robertpelloni/hermes-agent/pkg/ai"
 	"github.com/robertpelloni/hermes-agent/pkg/aiclient"
+	"github.com/robertpelloni/hermes-agent/pkg/memory"
 	"github.com/robertpelloni/hermes-agent/pkg/prompttemplates"
 	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
@@ -40,7 +41,18 @@ type Agent struct {
 	config        Config
 	running       bool
 	sessions      *sessionruntime.Runtime
+	memStore      *memory.Store
 	turnListeners []TurnListener
+}
+
+// SetMemoryStore attaches a persistent memory store to the agent.
+func (a *Agent) SetMemoryStore(m *memory.Store) {
+	a.memStore = m
+}
+
+// MemoryStore returns the configured memory store, if any.
+func (a *Agent) MemoryStore() *memory.Store {
+	return a.memStore
 }
 
 // AddTurnListener attaches a TurnListener to observe conversation turn events.
@@ -168,6 +180,10 @@ func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string
 		}
 		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, text))
 		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, resp))
+	}
+	if err == nil && a.memStore != nil {
+		_ = a.memStore.SaveMessage(sessID, "user", text)
+		_ = a.memStore.SaveMessage(sessID, "assistant", resp)
 	}
 
 	for _, l := range a.turnListeners {
@@ -386,6 +402,10 @@ func (a *Agent) handleMessageStreamImplWithSession(ctx context.Context, sessID, 
 			}
 			_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, userText))
 			_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, assistantText))
+		}
+		if a.memStore != nil && sessID != "" {
+			_ = a.memStore.SaveMessage(sessID, "user", userText)
+			_ = a.memStore.SaveMessage(sessID, "assistant", assistantText)
 		}
 
 		ch <- StreamEvent{Type: EventOutcome, Outcome: assistantText}
