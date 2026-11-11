@@ -5,7 +5,9 @@
 ### architecture
 - python hermes-agent is the core implementation (~12k loc in run_agent.py)
 - go desktop app is a thin wrapper/launcher (currently ~150 loc in cmd/hermes/main.go)
-- go packages are stubs: agent, gateway, mcp, memory, scheduler, skill
+- go packages: agent, gateway, mcp (JSON-RPC tool server), memory (SQLite persistence), scheduler (cron parsing & loop), skill (recursive loader)
+- electron desktop app includes a native system tray icon with background server lifecycle management and quit controls (`apps/desktop/electron/tray.ts`)
+- web dashboard features a consolidated Command Center overview (`web/src/pages/OverviewPage.tsx`) and categorized sidebar navigation
 
 ### build system
 - python: uses uv/pip, venv in .venv/ or venv/

@@ -1,5 +1,282 @@
 # changelog
 
+## 1.0.0-build.50 (2026-11-05)
+
+### added
+- Refined dashboard instance conflict detection in `cmd/hermes/main.go` using a bounded 2-second timeout client with multi-endpoint probing (`/overview` and `/`), preventing startup hangs when port 9120 is occupied.
+
+## 1.0.0-build.49 (2026-11-05)
+
+### added
+- Added SQLite persistent memory store conversation rehydration to `buildInitialMessagesWithSession` in Go Agent (`pkg/agent/agent.go`), allowing sessions without active memory caches to recover turn history automatically from `memory.db`.
+- Added unit test suite `TestAgentMemoryStoreHistoryRehydration` in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.48 (2026-11-05)
+
+### added
+- Expanded `roadmap.md` with in-depth implementation details for the Go Agent Loop (streaming events, TurnMetrics listeners, compaction gates, grace turns, slash commands) and SQLite Memory Store (WAL mode, relational persistence, and vector indexing roadmap).
+
+## 1.0.0-build.47 (2026-11-05)
+
+### added
+- Added unit tests for `pkg/aiclient` in `pkg/aiclient/aiclient_test.go` covering client instantiation and OpenAI-compatible streaming completion.
+
+## 1.0.0-build.46 (2026-11-05)
+
+### added
+- Documented Gateway Relay & Connector WebSocket Protocol integration in `docs/design/go-subsystems-architecture.md` according to Relay ↔ Connector Contract (v1).
+- Added gateway relay parameters (`gateway.relay.url`, `gateway.relay.token`) to `docs/config/specification.md`.
+
+## 1.0.0-build.45 (2026-11-05)
+
+### added
+- Attached persistent `memory.Store` to Go `agent.Agent` in `cmd/hermes/main.go`.
+- Registered global tools from `toolregistry.Global()` directly to the background MCP JSON-RPC server (`mcpServer.RegisterTool`), ensuring parity with the Python dashboard.
+- Verified build and subsystem tests across `pkg/` and `cmd/`.
+
+## 1.0.0-build.44 (2026-11-05)
+
+### added
+- Integrated persistent `memory.Store` into Go Agent (`pkg/agent/agent.go`) via `SetMemoryStore` and `MemoryStore`.
+- Added automatic conversation message persistence (`SaveMessage`) into SQLite backed store across both synchronous turns and streaming executions.
+- Added unit test suite `TestAgentMemoryStorePersistence` in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.43 (2026-11-05)
+
+### added
+- Implemented `RunStandaloneLoop` in Go Agent (`pkg/agent/standalone.go`) for standalone CLI conversation execution with interactive slash commands (`/help`, `/model`, `/sessions`, `/clear`, `/quit`, `/exit`) and live streaming terminal output.
+- Added unit test suite `TestStandaloneLoopSlashCommands` in `pkg/agent/standalone_test.go`.
+- Connected `RunStandaloneLoop` to `cmd/hermes/main.go` under default agent interactive execution mode.
+
+## 1.0.0-build.42 (2026-11-05)
+
+### added
+- Added `TurnMetrics` struct and `TurnMetricsListener` interface in Go Agent (`pkg/agent/agent.go`) for tracking iteration counts, prompt tokens, completion tokens, and total tokens.
+- Added grace-turn system prompt injection on the final iteration to ensure clean wrap-up without unbounded tool churning.
+- Verified metrics calculation and lifecycle event dispatch with `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.41 (2026-11-05)
+
+### added
+- Added `TurnListener` interface (`OnTurnStart`, `OnTurnComplete`) and `AddTurnListener` to Go Agent (`pkg/agent/agent.go`) for turn lifecycle observation.
+- Added graceful iteration budget fallback messaging in `runConversationWithSession`.
+- Added unit test suite `TestAgentTurnListenerHooks` in `pkg/agent/agent_e2e_test.go`.
+- Documented behavioral impact of configuration keys (reasoning effort, turn limits, guardrails, session isolation) in `docs/config/specification.md` and `website/docs/user-guide/configuration.md`.
+
+## 1.0.0-build.40 (2026-11-05)
+
+### added
+- Authored unified cross-harness configuration specification at `docs/config/specification.md` defining precedence hierarchies, schema mappings, secrets manager integrations, and cross-harness verification contracts.
+- Cross-referenced configuration architecture in user guide (`website/docs/user-guide/configuration.md`) and Go architecture docs (`docs/design/go-subsystems-architecture.md`).
+
+## 1.0.0-build.39 (2026-11-05)
+
+### added
+- Documented realized architectural milestones and added aggressive design proposals in `ideas.md` (hybrid Go-Python direct IPC bridge, embedded native webview, and sqlite-vec semantic memory search).
+
+## 1.0.0-build.38 (2026-11-05)
+
+### added
+- Session turn persistence and automatic session label derivation support for `HandleMessageStream` in Go Agent (`pkg/agent/agent.go`), verified by `TestAgentStreamingSessionPersistence` in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.37 (2026-11-05)
+
+### added
+- Documented Desktop & Go Subsystems environment configuration and Electron system tray management in user guide documentation (`website/docs/user-guide/configuration.md`).
+
+## 1.0.0-build.36 (2026-11-05)
+
+### added
+- Unit test suite for Go RepoMap subsystem (`pkg/repomap/repomap_test.go`) validating ranked repository map generation, mentioned file scoring boosts, and line counting.
+
+## 1.0.0-build.35 (2026-11-05)
+
+### added
+- Unit test suite for Go ToolRegistry subsystem (`pkg/toolregistry/registry_test.go`) covering tool validation, execution invocation, removal, and global singleton access.
+
+## 1.0.0-build.34 (2026-11-05)
+
+### added
+- Automatic session label derivation from the initial user prompt in Go Agent `HandleMessage` (`pkg/agent/agent.go`), verified with unit tests in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.33 (2026-11-05)
+
+### added
+- Marked Phase 3 in `roadmap.md` complete, tracking implementations and test suites across agent loop, memory store, skill loader, gateway, mcp server, scheduler, session runtime, model registry, and plugin manager.
+
+## 1.0.0-build.32 (2026-11-05)
+
+### added
+- Updated `deploy.md` with complete environment variable documentation and Electron desktop launch instructions.
+
+## 1.0.0-build.31 (2026-11-05)
+
+### added
+- Documented Configuration Architecture & Runtime Environment in `docs/design/go-subsystems-architecture.md`, including environment variable matrix, persistence paths, and configuration resolution hierarchy.
+
+## 1.0.0-build.30 (2026-11-05)
+
+### added
+- Unit test suite for Go Compat Subsystem (`pkg/compat/compat_test.go`) covering tool parity catalog registration, cross-harness lookup, and summary generation.
+
+## 1.0.0-build.29 (2026-11-05)
+
+### added
+- Unit test suite for Go LSP Client subsystem (`pkg/lspclient/client_test.go`) covering client singleton initialization, safe closing, and lifecycle protection against post-shutdown calls.
+
+## 1.0.0-build.28 (2026-11-05)
+
+### added
+- Unit test suite for Go Subcmd subsystem (`pkg/subcmd/run_binary_test.go`) covering external binary execution, combined stdout/stderr capture, and context timeout cancellation.
+
+## 1.0.0-build.27 (2026-11-05)
+
+### added
+- Unit test suite for Go AI Helpers subsystem (`pkg/ai/helpers_test.go`) covering text message creation, tool call/result serialization, error formatting, and token count estimation.
+
+## 1.0.0-build.26 (2026-11-05)
+
+### added
+- Unit test suite for Go Compaction subsystem (`pkg/compaction/compaction_test.go`) covering token estimation, threshold triggers, and lossy context summarization.
+
+## 1.0.0-build.25 (2026-11-05)
+
+### added
+- Unit test suite for Go Assimilation Subsystem (`pkg/assimilation/inventory_test.go`) validating toolchain inventory and formatted catalog output.
+
+## 1.0.0-build.24 (2026-11-05)
+
+### added
+- Updated `vision.md` architecture diagram tree to enumerate all initialized Go subsystems (`agent, gateway, mcp, memory, scheduler, skill, sessionruntime, modelregistry, plugin, adapters`).
+
+## 1.0.0-build.23 (2026-11-05)
+
+### added
+- Added `EventThinking` streaming event type to `pkg/agent/events.go` and wired it into `pkg/agent/agent.go` to emit structured reasoning deltas during LLM streaming.
+
+## 1.0.0-build.22 (2026-11-05)
+
+### added
+- Unit test suite for Go Plugin subsystem (`pkg/plugin/manager_test.go`) covering plugin discovery, registration, lifecycle hooks (OnLoad/OnUnload), tool registration/unregistration, and status reporting.
+
+## 1.0.0-build.21 (2026-11-05)
+
+### added
+- Multi-turn conversational memory injection in Go Agent (`buildInitialMessagesWithSession` in `pkg/agent/agent.go`), allowing past session history to provide context across sequential turns.
+- Multi-turn conversation persistence test in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.20 (2026-11-05)
+
+### added
+- Unit test suite `pkg/orchestration/planner_test.go` verifying execution plan derivation, keyword-based repository mapping, and formatted plan output.
+
+## 1.0.0-build.19 (2026-11-05)
+
+### added
+- Unit test suite `internal/tui/commands_test.go` covering slash command registry, alias resolution, prefix stripping, and help/status handlers.
+
+## 1.0.0-build.18 (2026-11-05)
+
+### added
+- Updated `vision.md` metrics and architectural alignment reflecting completed Go agent loop, skills system, SQLite memory persistence, task scheduler, MCP server, and Electron system tray.
+
+## 1.0.0-build.17 (2026-11-05)
+
+### added
+- Environment variable configuration support for `HERMES_MODEL`, `HERMES_PROVIDER`, and `HERMES_BASE_URL` in Go `agent.DefaultConfig()` (`pkg/agent/agent.go`).
+- Unit test coverage `TestDefaultConfigWithEnvOverrides` in `pkg/agent/agent_e2e_test.go`.
+
+## 1.0.0-build.16 (2026-11-05)
+
+### added
+- Documented `pkg/adapters` (provider route resolution and MCP discovery) in `docs/design/go-subsystems-architecture.md`.
+- Added "Future Integration Points & Native Desktop Expansion" architecture roadmap covering Electron IPC channels, Pi-Mono streaming alignment, and self-improving skill synthesis.
+
+## 1.0.0-build.15 (2026-11-05)
+
+### added
+- Unit test suite for `pkg/adapters` (`pkg/adapters/adapters_test.go`) covering provider route selection, cost preferences, execution plan formatting, and MCP configuration discovery.
+
+## 1.0.0-build.14 (2026-11-05)
+
+### added
+- Detailed architecture specifications for `pkg/agent`, `pkg/sessionruntime`, and `pkg/modelregistry` in `docs/design/go-subsystems-architecture.md`.
+
+## 1.0.0-build.13 (2026-11-05)
+
+### added
+- Streaming agent loop unit tests (`TestAgentStreamingLoop`) in `pkg/agent/agent_e2e_test.go` verifying delta event propagation, outcome delivery, and done events.
+- Agent session persistence verification (`TestAgentSessionPersistence`) in `pkg/agent/agent_e2e_test.go` ensuring conversation turns are recorded into `sessionruntime.Runtime`.
+
+## 1.0.0-build.12 (2026-11-05)
+
+### added
+- Session Runtime unit test suite (`pkg/sessionruntime/sessionruntime_test.go`) covering session lifecycle, message appending, search, forking, and context truncation.
+- Model Registry unit test suite (`pkg/modelregistry/registry_test.go`) testing provider registration, key resolution, and model lookup.
+- Integrated `sessionruntime.Runtime` into Go `Agent` (`pkg/agent/agent.go`) to automatically record conversational turns per session.
+- Subsystem initialization in `cmd/hermes/main.go` wires `sessionruntime.NewRuntime` directly to the `Agent`.
+
+## 1.0.0-build.11 (2026-11-05)
+
+### added
+- comprehensive architecture documentation specification for Go subsystems (`docs/design/go-subsystems-architecture.md`) detailing memory, skills, MCP, scheduler, and gateway layouts.
+
+## 1.0.0-build.10 (2026-11-05)
+
+### added
+- HTTP status and health endpoint (`StatusHandler`) on Go Gateway (`pkg/gateway/gateway.go`) to expose registered communication platforms and gateway status.
+- unit test coverage in `pkg/gateway/gateway_test.go`.
+
+## 1.0.0-build.9 (2026-11-05)
+
+### added
+- dynamic platform registration (`RegisterPlatform`) and query (`Platforms`) in Go gateway subsystem (`pkg/gateway/gateway.go`).
+- unit test coverage in `pkg/gateway/gateway_test.go` verifying platform lifecycle management and startup dispatch.
+
+## 1.0.0-build.8 (2026-11-05)
+
+### added
+- updated `deploy.md` with instructions for `scripts/build_all.sh` and multi-harness commands.
+- updated `memory.md` recording architecture of Go subsystems (SQLite memory, skill loader, scheduler) and Electron desktop system tray.
+
+## 1.0.0-build.7 (2026-11-05)
+
+### added
+- connected Go skill discovery (`pkg/skill.LoadFromDir`) and task scheduler (`pkg/scheduler.New`) into the Go desktop initialization lifecycle in `cmd/hermes/main.go` with graceful shutdown handling.
+
+## 1.0.0-build.6 (2026-11-05)
+
+### added
+- automated unit test coverage for Model Context Protocol (MCP) server (`pkg/mcp/mcp_test.go`) covering JSON-RPC tool listing, dynamic invocation, and result serialization.
+
+## 1.0.0-build.5 (2026-11-05)
+
+### added
+- automated skill loader and directory crawler in Go (`pkg/skill/skill.go`): `LoadFromDir()`, supporting YAML frontmatter extraction from `SKILL.md` and module docstring parsing from `.py` files.
+- unit test suite `pkg/skill/skill_test.go` verifying discovery, metadata extraction, and repository registration.
+
+## 1.0.0-build.4 (2026-11-04)
+
+### added
+- persistent session query and lifecycle methods in Go memory package (`pkg/memory/sqlite_store.go` and `pkg/memory/memory.go`): `ListSessions()`, `CountMessages()`, and `DeleteSession()`.
+- unit test suite `pkg/memory/sqlite_store_test.go` verifying SQLite schema creation, message inserts, counting, session enumeration, and session deletion.
+
+## 1.0.0-build.3 (2026-11-04)
+
+### added
+- system tray icon and server management (`apps/desktop/electron/tray.ts`) with quick status indicators, main window toggling, external dashboard launcher, docs shortcuts, backend restart, and safe graceful server shutdown.
+- vitest unit test suite for electron system tray actions (`apps/desktop/electron/tray.test.ts`).
+- consolidated command center & overview page (`web/src/pages/OverviewPage.tsx`) unifying live telemetry, active model stats, persistent session counters, scheduled automations, quick workflows, and platform health.
+- unit test coverage for the overview command center (`web/src/pages/OverviewPage.test.tsx`).
+- unified multi-harness build & check script (`scripts/build_all.sh`).
+- non-destructive archive mechanism for legacy scripts under `scripts/archive/`.
+
+### changed
+- redesigned dashboard sidebar navigation in `web/src/App.tsx` into four prioritized functional sections: Workspace, Capabilities & Intelligence, Automations & Connectors, and Operations & System.
+- added informative hover tooltips across collapsed and expanded nav items to explain feature roles.
+- updated `start.bat` with `build-all` and `web` targets.
+- recompiled production web bundle into `hermes_cli/web_dist/`.
+
 ## 1.0.0-build.2 (2026-06-14)
 
 ### added

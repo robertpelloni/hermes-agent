@@ -10,14 +10,56 @@ import (
 
 	"github.com/robertpelloni/hermes-agent/pkg/ai"
 	"github.com/robertpelloni/hermes-agent/pkg/aiclient"
+	"github.com/robertpelloni/hermes-agent/pkg/memory"
 	"github.com/robertpelloni/hermes-agent/pkg/prompttemplates"
+	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
 	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
 
+// TurnMetrics captures token usage and turn count metrics for a completed conversation turn.
+type TurnMetrics struct {
+	Iterations       int
+	PromptTokens     int
+	CompletionTokens int
+	TotalTokens      int
+}
+
+// TurnListener is an interface for observing conversation turn lifecycle events.
+type TurnListener interface {
+	OnTurnStart(sessID, prompt string)
+	OnTurnComplete(sessID, prompt, outcome string, err error)
+}
+
+// TurnMetricsListener extends TurnListener to receive token usage metrics upon turn completion.
+type TurnMetricsListener interface {
+	TurnListener
+	OnTurnMetrics(sessID string, metrics TurnMetrics)
+}
+
 // Agent is the core Hermes AI agent.
 type Agent struct {
-	config   Config
-	running  bool
+	config        Config
+	running       bool
+	sessions      *sessionruntime.Runtime
+	memStore      *memory.Store
+	turnListeners []TurnListener
+}
+
+// SetMemoryStore attaches a persistent memory store to the agent.
+func (a *Agent) SetMemoryStore(m *memory.Store) {
+	a.memStore = m
+}
+
+// MemoryStore returns the configured memory store, if any.
+func (a *Agent) MemoryStore() *memory.Store {
+	return a.memStore
+}
+
+// AddTurnListener attaches a TurnListener to observe conversation turn events.
+func (a *Agent) AddTurnListener(l TurnListener) {
+	if l != nil {
+		a.turnListeners = append(a.turnListeners, l)
+	}
 }
 
 // Config holds agent configuration.
@@ -50,11 +92,15 @@ func DefaultConfig() Config {
 		fmt.Fprintf(os.Stderr, "[hermes] warning: prompt template %q not found, using default\n", promptTemplate)
 	}
 
+	model := getEnvDefault("HERMES_MODEL", "free-llm")
+	provider := getEnvDefault("HERMES_PROVIDER", "local-llm")
+	baseURL := getEnvDefault("HERMES_BASE_URL", fmt.Sprintf("http://127.0.0.1:%s/v1", getEnvDefault("HERMES_FREE_LLM_PORT", "4000")))
+
 	return Config{
-		Model:         "free-llm",
-		Provider:      "local-llm",
+		Model:         model,
+		Provider:      provider,
 		APIKey:        apiKey,
-		BaseURL:       fmt.Sprintf("http://127.0.0.1:%s/v1", getEnvDefault("HERMES_FREE_LLM_PORT", "4000")),
+		BaseURL:       baseURL,
 		MaxTokens:     4096,
 		Temperature:   0.7,
 		TopP:          0.9,
@@ -86,6 +132,16 @@ func New(cfg Config) *Agent {
 	return &Agent{config: cfg, running: false}
 }
 
+// SetSessionRuntime sets the session runtime store for the agent.
+func (a *Agent) SetSessionRuntime(rt *sessionruntime.Runtime) {
+	a.sessions = rt
+}
+
+// SessionRuntime returns the configured session runtime store, if any.
+func (a *Agent) SessionRuntime() *sessionruntime.Runtime {
+	return a.sessions
+}
+
 // Run starts the agent's main loop (no-op for now; the agent is driven per-message).
 func (a *Agent) Run(ctx context.Context) error {
 	fmt.Printf("[hermes] Agent ready: model=%s provider=%s baseURL=%s\n", a.config.Model, a.config.Provider, a.config.BaseURL)
@@ -101,23 +157,64 @@ func (a *Agent) SystemPrompt() string {
 // HandleMessage processes an incoming user message through the full agent loop.
 func (a *Agent) HandleMessage(ctx context.Context, platform, userID, text string) (string, error) {
 	fmt.Printf("[hermes] Message from %s/%s: %s\n", platform, userID, text)
-	return a.runConversation(ctx, text)
+	sessID := fmt.Sprintf("%s:%s", platform, userID)
+	for _, l := range a.turnListeners {
+		l.OnTurnStart(sessID, text)
+	}
+
+	resp, metrics, err := a.runConversationWithSessionAndMetrics(ctx, sessID, text)
+	if err == nil && a.sessions != nil {
+		sess, ok := a.sessions.Get(sessID)
+		if !ok {
+			created, errCreate := a.sessions.Create(sessID)
+			if errCreate == nil {
+				sess = created
+			}
+		}
+		if sess != nil && sess.Label == "" {
+			label := strings.TrimSpace(text)
+			if len(label) > 40 {
+				label = label[:40] + "..."
+			}
+			sess.Label = label
+		}
+		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, text))
+		_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, resp))
+	}
+	if err == nil && a.memStore != nil {
+		_ = a.memStore.SaveMessage(sessID, "user", text)
+		_ = a.memStore.SaveMessage(sessID, "assistant", resp)
+	}
+
+	for _, l := range a.turnListeners {
+		l.OnTurnComplete(sessID, text, resp, err)
+		if ml, ok := l.(TurnMetricsListener); ok {
+			ml.OnTurnMetrics(sessID, metrics)
+		}
+	}
+
+	return resp, err
 }
 
 // HandleMessageStream processes a user message and streams events on the returned channel.
 // The caller must read from the channel until it is closed.
 func (a *Agent) HandleMessageStream(ctx context.Context, platform, userID, text string) <-chan StreamEvent {
 	ch := make(chan StreamEvent, 64)
+	sessID := fmt.Sprintf("%s:%s", platform, userID)
 	go func() {
 		defer close(ch)
-		a.handleMessageStreamImpl(ctx, text, ch)
+		a.handleMessageStreamImplWithSession(ctx, sessID, text, ch)
 	}()
 	return ch
 }
 
 // handleMessageStreamImpl is the goroutine that emits StreamEvents.
 func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch chan<- StreamEvent) {
-	messages := a.buildInitialMessages(userText)
+	a.handleMessageStreamImplWithSession(ctx, "", userText, ch)
+}
+
+func (a *Agent) handleMessageStreamImplWithSession(ctx context.Context, sessID, userText string, ch chan<- StreamEvent) {
+	messages := a.buildInitialMessagesWithSession(sessID, userText)
 
 	for iter := 0; iter < a.config.MaxIterations; iter++ {
 		messages = a.maybeCompact(messages)
@@ -160,7 +257,7 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 
 			case "thinking_delta":
 				if event.Thinking != "" {
-					// thinking is included in the final response
+					ch <- StreamEvent{Type: EventThinking, Text: event.Thinking}
 				}
 
 			case "tool_call_delta":
@@ -288,6 +385,29 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 		}
 
 		// No tool calls – this is the final response
+		if a.sessions != nil && sessID != "" {
+			sess, ok := a.sessions.Get(sessID)
+			if !ok {
+				created, errCreate := a.sessions.Create(sessID)
+				if errCreate == nil {
+					sess = created
+				}
+			}
+			if sess != nil && sess.Label == "" {
+				label := strings.TrimSpace(userText)
+				if len(label) > 40 {
+					label = label[:40] + "..."
+				}
+				sess.Label = label
+			}
+			_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleUser, userText))
+			_ = a.sessions.AppendMessage(sessID, ai.NewTextMessage(ai.RoleAssistant, assistantText))
+		}
+		if a.memStore != nil && sessID != "" {
+			_ = a.memStore.SaveMessage(sessID, "user", userText)
+			_ = a.memStore.SaveMessage(sessID, "assistant", assistantText)
+		}
+
 		ch <- StreamEvent{Type: EventOutcome, Outcome: assistantText}
 		ch <- StreamEvent{Type: EventDone}
 		return
@@ -298,19 +418,37 @@ func (a *Agent) handleMessageStreamImpl(ctx context.Context, userText string, ch
 }
 
 
-// runConversation runs the full agent loop:
-// 1. Manage message history
+// runConversation runs the full agent loop without session context.
+func (a *Agent) runConversation(ctx context.Context, userText string) (string, error) {
+	return a.runConversationWithSession(ctx, "", userText)
+}
+
+// runConversationWithSession runs the full agent loop:
+// 1. Manage message history with existing session context if available
 // 2. Call AI for streaming response
 // 3. Handle tool calls
 // 4. Repeat until text response
-func (a *Agent) runConversation(ctx context.Context, userText string) (string, error) {
+func (a *Agent) runConversationWithSession(ctx context.Context, sessID, userText string) (string, error) {
+	resp, _, err := a.runConversationWithSessionAndMetrics(ctx, sessID, userText)
+	return resp, err
+}
+
+func (a *Agent) runConversationWithSessionAndMetrics(ctx context.Context, sessID, userText string) (string, TurnMetrics, error) {
 	// Build initial message list
-	messages := a.buildInitialMessages(userText)
+	messages := a.buildInitialMessagesWithSession(sessID, userText)
 
 	// Main conversation loop
 	var finalResponse string
+	var metrics TurnMetrics
 
 	for iter := 0; iter < a.config.MaxIterations; iter++ {
+		metrics.Iterations = iter + 1
+
+		// If this is the final iteration, inject a guidance message asking to summarize
+		if iter == a.config.MaxIterations-1 && len(messages) > 1 {
+			messages = append(messages, ai.NewTextMessage("system", "You have reached your final turn budget. Provide your final concise answer or progress summary now without calling additional tools."))
+		}
+
 		// Check compaction before each LLM call
 		messages = a.maybeCompact(messages)
 
@@ -331,7 +469,7 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 			Tools:       toolDefs,
 		})
 		if err != nil {
-			return "", fmt.Errorf("ai stream error: %w", err)
+			return "", metrics, fmt.Errorf("ai stream error: %w", err)
 		}
 
 		// Accumulate tool call arguments by index
@@ -345,7 +483,7 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 		for event := range stream {
 			switch event.Type {
 			case "error":
-				return "", fmt.Errorf("ai streaming error: %w", event.Error)
+				return "", metrics, fmt.Errorf("ai streaming error: %w", event.Error)
 
 			case "text_delta":
 				assistantText += event.Text
@@ -463,18 +601,58 @@ func (a *Agent) runConversation(ctx context.Context, userText string) (string, e
 		break
 	}
 
-	return finalResponse, nil
+	if finalResponse == "" {
+		finalResponse = "Iteration budget reached. Summarizing current progress and awaiting next instructions."
+	}
+
+	metrics.PromptTokens = ai.EstimateTokenCount(messages)
+	metrics.CompletionTokens = len(strings.Fields(finalResponse))
+	metrics.TotalTokens = metrics.PromptTokens + metrics.CompletionTokens
+
+	return finalResponse, metrics, nil
 }
 
 // buildInitialMessages creates the initial message list with system prompt and user message.
 func (a *Agent) buildInitialMessages(userText string) []ai.Message {
-	messages := make([]ai.Message, 0, 4)
+	return a.buildInitialMessagesWithSession("", userText)
+}
+
+// buildInitialMessagesWithSession creates the initial message list, including history if available.
+func (a *Agent) buildInitialMessagesWithSession(sessID, userText string) []ai.Message {
+	messages := make([]ai.Message, 0, 8)
 
 	// Add system prompt
 	messages = append(messages, ai.NewTextMessage("system", a.config.SystemPrompt))
 
+	// If session exists, inject past messages
+	var historyLoaded bool
+	if a.sessions != nil && sessID != "" {
+		if sess, ok := a.sessions.Get(sessID); ok && len(sess.Messages) > 0 {
+			for _, m := range sess.Messages {
+				if m.Role != "system" {
+					messages = append(messages, m)
+				}
+			}
+			historyLoaded = true
+		}
+	}
+
+	// Fallback to SQLite memory store if session runtime has no history
+	if !historyLoaded && a.memStore != nil && sessID != "" {
+		if storedMsgs, err := a.memStore.LoadMessages(sessID); err == nil && len(storedMsgs) > 0 {
+			for _, sm := range storedMsgs {
+				if sm.Role != "system" {
+					role := ai.MessageRole(sm.Role)
+					messages = append(messages, ai.NewTextMessage(role, sm.Content))
+				}
+			}
+		}
+	}
+
 	// Add user message
-	messages = append(messages, ai.NewTextMessage(ai.RoleUser, userText))
+	if userText != "" {
+		messages = append(messages, ai.NewTextMessage(ai.RoleUser, userText))
+	}
 
 	return messages
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -25,6 +24,10 @@ import (
 	"github.com/robertpelloni/hermes-agent/pkg/orchestration"
 	"github.com/robertpelloni/hermes-agent/pkg/plugin"
 	"github.com/robertpelloni/hermes-agent/pkg/repomap"
+	"github.com/robertpelloni/hermes-agent/pkg/scheduler"
+	"github.com/robertpelloni/hermes-agent/pkg/sessionruntime"
+	"github.com/robertpelloni/hermes-agent/pkg/skill"
+	"github.com/robertpelloni/hermes-agent/pkg/toolregistry"
 )
 
 func findPython() (string, error) {
@@ -130,12 +133,22 @@ func main() {
 		// Dashboard (or TUI) mode – same launch path, the Python web server
 		// always serves the TUI when `--tui` flag is passed.
 		dashRunning := false
-		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s", port))
+		checkClient := &http.Client{Timeout: 2 * time.Second}
+		resp, err := checkClient.Get(fmt.Sprintf("http://127.0.0.1:%s/overview", port))
 		if err == nil && resp.StatusCode == http.StatusOK {
 			resp.Body.Close()
 			dashRunning = true
-			fmt.Printf("  dashboard already running on http://127.0.0.1:%s\n", port)
+			fmt.Printf("  existing dashboard instance detected on http://127.0.0.1:%s\n", port)
 		} else if err == nil {
+			// Check if root responds
+			rootResp, rootErr := checkClient.Get(fmt.Sprintf("http://127.0.0.1:%s/", port))
+			if rootErr == nil && rootResp.StatusCode == http.StatusOK {
+				rootResp.Body.Close()
+				dashRunning = true
+				fmt.Printf("  existing dashboard instance detected on http://127.0.0.1:%s\n", port)
+			} else if rootErr == nil {
+				rootResp.Body.Close()
+			}
 			resp.Body.Close()
 		}
 
@@ -197,32 +210,22 @@ func main() {
 		defer cliCmd.Process.Kill()
 
 	case "agent":
-		// Agent mode – run the Go agent interactively via stdin/stdout.
-		fmt.Println("running Go agent interactively. type '/quit' or '/exit' to stop.")
+		// Agent mode – run the Go agent interactively via stdin/stdout with streaming and slash commands.
+		sessRuntime := sessionruntime.NewRuntime("", true)
 		ag := agent.New(agent.DefaultConfig())
+		ag.SetSessionRuntime(sessRuntime)
+
 		if err := ag.Run(ctx); err != nil {
 			log.Printf("agent run error: %v", err)
 		}
-		scanner := bufio.NewScanner(os.Stdin)
-		for {
-			fmt.Print("\n> ")
-			if !scanner.Scan() {
-				break
-			}
-			line := strings.TrimSpace(scanner.Text())
-			if line == "" {
-				continue
-			}
-			if line == "/quit" || line == "/exit" {
-				fmt.Println("exiting agent")
-				break
-			}
-			resp, err := ag.HandleMessage(ctx, "cli", "local", line)
-			if err != nil {
-				fmt.Printf("Error: %v\n", err)
-			} else {
-				fmt.Println(resp)
-			}
+
+		if err := ag.RunStandaloneLoop(ctx, agent.StandaloneOptions{
+			In:           os.Stdin,
+			Out:          os.Stdout,
+			SessionID:    "cli:local",
+			PromptPrefix: "\n> ",
+		}); err != nil {
+			log.Printf("agent session ended: %v", err)
 		}
 		return
 
@@ -281,12 +284,33 @@ func main() {
 	// ----- common subsystem initialization -----------------------------------
 	memStore := memory.NewStore()
 	mcpServer := mcp.NewServer("hermes-agent-go", "0.1.0")
+	sessRuntime := sessionruntime.NewRuntime("", true)
 	pluginMgr := plugin.NewManager()
 	if discovered, err := pluginMgr.Discover(); err == nil && len(discovered) > 0 {
 		fmt.Printf("  plugins discovered: %v\n", discovered)
 	}
 
+	skillRepo := skill.NewRepository()
+	if n, err := skillRepo.LoadFromDir(filepath.Join(root, "skills")); err == nil {
+		fmt.Printf("  skills loaded: %d\n", n)
+	}
+
+	sched := scheduler.New()
+	sched.Start(ctx)
+
+	// Connect global tools to MCP server
+	globalTools := toolregistry.Global().List()
+	for _, t := range globalTools {
+		toolName := t.Name
+		mcpServer.RegisterTool(toolName, func(args map[string]any) (any, error) {
+			return toolregistry.Global().Call(toolName, args, map[string]any{})
+		})
+	}
+	fmt.Printf("  tools registered to MCP: %d\n", len(globalTools))
+
 	ag := agent.New(agent.DefaultConfig())
+	ag.SetSessionRuntime(sessRuntime)
+	ag.SetMemoryStore(memStore)
 
 	// Start MCP server in background
 	go func() {
@@ -315,6 +339,7 @@ func main() {
 	fmt.Println()
 	fmt.Println("shutting down...")
 	cancel()
+	sched.Stop()
 	memStore.Close()
 	gw.Stop()
 	fmt.Println("done.")

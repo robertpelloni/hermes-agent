@@ -2,7 +2,9 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/robertpelloni/hermes-agent/pkg/agent"
 )
@@ -36,6 +38,30 @@ func New(ag *agent.Agent) *Gateway {
 		agent:     ag,
 		platforms: []Platform{&CLIPlatform{}},
 	}
+}
+
+// RegisterPlatform dynamically registers a communication platform.
+func (g *Gateway) RegisterPlatform(p Platform) {
+	g.platforms = append(g.platforms, p)
+	fmt.Printf("[hermes:gateway] Registered platform: %s\n", p.Name())
+}
+
+// Platforms returns the names of all registered communication platforms.
+func (g *Gateway) Platforms() []string {
+	names := make([]string, 0, len(g.platforms))
+	for _, p := range g.platforms {
+		names = append(names, p.Name())
+	}
+	return names
+}
+
+// StatusHandler serves a JSON summary of registered platforms and gateway health.
+func (g *Gateway) StatusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":    "running",
+		"platforms": g.Platforms(),
+	})
 }
 
 // Start launches all platform listeners.

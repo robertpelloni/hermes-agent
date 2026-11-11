@@ -131,6 +131,7 @@ import { buildPathExtCandidates, chooseUpdaterArgs, getVenvSitePackagesEntries, 
 import { readWindowsUserEnvVar } from './windows-user-env'
 import { isPackagedInstallPath as isPackagedInstallPathUnderRoots } from './workspace-cwd'
 import { readWslWindowsClipboardImage } from './wsl-clipboard-image'
+import { createAppTray, destroyAppTray } from './tray'
 
 const USER_DATA_OVERRIDE = process.env.HERMES_DESKTOP_USER_DATA_DIR
 
@@ -798,6 +799,7 @@ function registerMediaProtocol() {
 let mainWindow = null
 let hermesProcess = null
 let connectionPromise = null
+let activeBackendUrl: string | null = null
 // True while connection-config:apply soft-rehomes the primary — suppresses the
 // backend-exit toast so an intentional kill doesn't look like a crash.
 let softRehomeInProgress = false
@@ -6293,6 +6295,7 @@ function stopBackendChild(child) {
 function resetHermesConnection({ soft = false } = {}) {
   connectionPromise = null
   backendStartFailure = null
+  activeBackendUrl = null
 
   stopBackendChild(hermesProcess)
 
@@ -6848,6 +6851,8 @@ async function startHermes() {
     await Promise.race([waitForHermes(baseUrl, token), backendStartFailed])
     backendReady = true
     backendStartFailure = null
+
+    activeBackendUrl = baseUrl
 
     const authToken = await adoptServedDashboardToken(baseUrl, token, {
       // The exit/error handlers null hermesProcess when the child dies.
@@ -9028,6 +9033,24 @@ app.whenReady().then(() => {
   registerPowerResumeListeners()
   createWindow()
 
+  createAppTray({
+    getMainWindow: () => mainWindow,
+    getDashboardUrl: () => activeBackendUrl,
+    restartBackend: async () => {
+      rememberLog('[tray] restart backend server requested')
+      await teardownPrimaryBackendAndWait()
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('hermes:connection-reset')
+      }
+    },
+    stopAllServers: () => {
+      rememberLog('[tray] stop all servers requested')
+      stopBackendChild(hermesProcess)
+      stopAllPoolBackends()
+    },
+    getIconPath: () => getAppIconPath()
+  })
+
   // Win/Linux cold start: the launching hermes:// URL is in our own argv.
   const _coldStartLink = _extractDeepLink(process.argv)
 
@@ -9071,6 +9094,8 @@ function configureSpellChecker() {
 }
 
 app.on('before-quit', () => {
+  destroyAppTray()
+
   // The always-on-top overlay isn't a "real" app window; close it so a stray
   // pet can't keep the process alive or float over a quit app.
   closePetOverlay()
