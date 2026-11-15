@@ -146,18 +146,31 @@ RELEASE_v*.md
 # walkthroughs). Throwaway artifacts, never part of the app.
 apps/desktop/demo/
 
-<<<<<<< HEAD
 # Agent Cache / Runtime Artifacts
 .pi/
 *.exe~
+hermes*.exe
 pid.txt
 **/pnpm-lock.yaml
-
 nul
-=======
+
 # PR infographics are rendered locally and embedded in PR descriptions via the
 # image-provider (fal.media) URL — they are NEVER committed to the repo. The
 # PR body is the archive. See the hermes-agent-dev skill's
 # pr-infographic-workflow reference (storage rule + lapse #8 / #COMMIT-1).
 infographic/
->>>>>>> upstream/main
+
+# Multi-language build artifacts
+rust/target/
+csharp/bin/
+csharp/obj/
+typescript/node_modules/
+java/**/*.class
+
+# Study submodules (untracked local reference clones)
+aider_submodule/
+code_submodule/
+
+# Workspace go files
+go.work
+go.work.sum

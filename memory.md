@@ -37,3 +37,7 @@
 - dashboard already running on 9120 from previous sessions
 - go binary uses system python, not venv python
 - start.bat updated to reference hermes-desktop.exe (was hermes-agent-go.exe)
+## massive multi-language harness architecture
+- starting complete rewrite in 5 languages: TypeScript, Rust, Go, C#, Java.
+- each language implementation must have identical feature parity.
+- integrating features from 30+ top AI coding tools.

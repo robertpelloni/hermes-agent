@@ -49,3 +49,7 @@ hermes could modify its own source code by submitting pull requests to itself af
 
 ### multi-agent marketplace
 a p2p marketplace where users can rent out their hermes agent's compute or skills to other users, creating a decentralized ai compute network.
+## ultimate coding harness integrations
+- comprehensive feature parity with 30+ top agentic tools (Claude Code, Warp, Replit, Aider, etc).
+- multi-language architecture: ship 5 identical versions of the core engine in Rust, Go, Java, C#, TypeScript.
+- Web browser extension integration: interface with ChatGPT, Gemini, Claude web interfaces to provide MCP server functionality, memory recording, web scraping.

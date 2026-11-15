@@ -31,3 +31,9 @@
 - go desktop app functions as launcher for python hermes dashboard (port 9120)
 - go packages are stub implementations ready for expansion
 - dashboard already running on port 9120 detected by launcher
+## 2.0.0-build.1 (2026-06-18)
+
+### added
+- Initialized ultimate multi-language harness project structure.
+- Updated vision, roadmap, and core documentation for massive porting effort.
+- Set up directories for rust, go, java, csharp, typescript base.

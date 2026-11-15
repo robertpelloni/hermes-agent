@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -21,23 +22,7 @@ var CommandRegistry = []CommandDef{
 		Description: "Show available commands and usage",
 		Category:    "Info",
 		Aliases:     []string{"?", "h"},
-		Handler: func(args string) string {
-			return `## Hermes TUI - Available Commands
-
-| Command | Description |
-|---------|-------------|
-| /help | Show available commands and usage |
-| /clear | Clear the transcript and start fresh |
-| /new | Start a new conversation session |
-| /quit | Exit the TUI |
-| /status | Show current session status |
-| /tools | List available tools |
-| /skills | List loaded skills |
-| /skin <name> | Change UI skin (e.g. /skin mono) |
-
-**Usage:** Type '/' followed by a command name, or press '/' to open the command palette.
-`
-		},
+		Handler:     nil, // Initialized in init()
 	},
 	{
 		Name:        "clear",
@@ -91,14 +76,14 @@ var CommandRegistry = []CommandDef{
 		},
 	},
 	{
-Name:        "skin",
-Description: "Change UI skin (e.g. /skin mono).",
-Category:    "Configuration",
-ArgsHint:    "<name>",
-Handler: func(args string) string {
-// Handled specially in UI; return empty string.
-return ""
-},
+		Name:        "skin",
+		Description: "Change UI skin (e.g. /skin mono).",
+		Category:    "Configuration",
+		ArgsHint:    "<name>",
+		Handler: func(args string) string {
+			// Handled specially in UI; return empty string.
+			return ""
+		},
 	},
 }
 
@@ -135,4 +120,17 @@ func FilterCommands(query string) []CommandDef {
 	return results
 }
 
-// helpHandler generates the help text dynamically to avoid initialization cycles.
+// init initializes the dynamic help handler to avoid initialization cycles.
+func init() {
+	CommandRegistry[0].Handler = func(args string) string {
+		var sb strings.Builder
+		sb.WriteString("## Hermes TUI - Available Commands\n\n")
+		sb.WriteString("| Command | Description |\n")
+		sb.WriteString("|---------|-------------|\n")
+		for _, cmd := range CommandRegistry {
+			sb.WriteString(fmt.Sprintf("| `/%s` | %s |\n", cmd.Name, cmd.Description))
+		}
+		sb.WriteString("\n**Usage:** Type `/` followed by a command name, or press `/` to open the command palette.\n")
+		return sb.String()
+	}
+}
